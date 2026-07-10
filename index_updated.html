@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffe1ea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sardar Tailoring">
+<title>New Order - Sardar Tailoring</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-gradient: linear-gradient(135deg, #fbf7f0 0%, #f3e9dc 100%);
+    --bg-panel: rgba(255, 255, 255, 0.7);
+    --border-color: rgba(35, 37, 43, 0.08);
+    --border-focus: #7c6fee;
+    --ink: #23252b;
+    --ink-muted: #6b6d78;
+    
+    --brand-pink: #ffe1ea;
+    --brand-pink-deep: #ff6f91;
+    --brand-pink-border: #ffd2dd;
+    --brand-pink-ink: #7a2236;
+    
+    --brand-purple: #e9e4ff;
+    --brand-purple-deep: #7c6fee;
+    --brand-purple-border: #d3caff;
+    --brand-purple-ink: #3b2c85;
+
+    --brand-teal: #d6f2ec;
+    --brand-teal-deep: #1f8a76;
+    --brand-teal-border: #b2e8dd;
+    --brand-teal-ink: #0b5043;
+
+    --brand-orange: #ffe8d6;
+    --brand-orange-deep: #ff8a3d;
+    --brand-orange-border: #ffd3b4;
+    --brand-orange-ink: #803f13;
+
+    --brand-blue: #e0f2fe;
+    --brand-blue-deep: #0284c7;
+    --brand-blue-border: #bae6fd;
+    --brand-blue-ink: #0369a1;
+
+    --emerald: #10b981;
+    --emerald-dark: #0f766e;
+    --rose: #f43f5e;
+    --white: #ffffff;
+    
+    --shadow-card: 0 16px 36px -12px rgba(35, 37, 43, 0.12), 0 4px 12px -4px rgba(35, 37, 43, 0.04);
+    --shadow-glow: 0 0 20px rgba(124, 111, 238, 0.12);
+    --shadow-soft: 0 8px 20px -6px rgba(35, 37, 43, 0.06);
+  }
+
+  * { box-sizing: border-box; }
+  
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  body {
+    font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #fbf7f0;
+    background-image: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  main {
+    padding: 16px 12px 140px;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ---- Brand Header Card ---- */
+  .brand-card {
+    background: var(--brand-pink);
+    border: 1px solid var(--brand-pink-border);
+    border-radius: 24px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 20px;
+  }
+  .brand-card .mark {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 111, 145, 0.12);
+    border: 1px solid var(--brand-pink-deep);
+    color: var(--brand-pink-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-card .mark svg {
+    width: 24px;
+    height: 24px;
+  }
+  .brand-card h1 {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0;
+    color: var(--brand-pink-ink);
+    letter-spacing: 0.01em;
+  }
+  .brand-card p {
+    margin: 2px 0 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--brand-pink-deep);
+    letter-spacing: 0.1em;
+  }
+
+  /* ---- Tab Switcher ---- */
+  .tab-switcher {
+    display: flex;
+    background: rgba(35, 37, 43, 0.04);
+    border: 1px solid rgba(35, 37, 43, 0.06);
+    border-radius: 16px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 44px;
+  }
+  .tab-btn:hover {
+    color: var(--ink);
+  }
+  .tab-btn.active {
+    background: var(--white);
+    color: var(--brand-purple-deep);
+    box-shadow: 0 4px 12px rgba(35, 37, 43, 0.05);
+  }
+  .history-badge {
+    background: var(--brand-purple-deep);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 2px 6px;
+    margin-left: 6px;
+    display: inline-block;
+  }
+
+  /* ---- Section Title styling ---- */
+  .section-title-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 28px 0 16px 4px;
+  }
+  .section-title-container h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 19px;
+    margin: 0;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .section-title-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--brand-purple-deep);
+    display: inline-block;
+  }
+  .section-title-dot.pieces { background: var(--brand-orange-deep); }
+  .section-title-dot.billing { background: var(--brand-teal-deep); }
+  .section-title-dot.receipt { background: var(--brand-pink-deep); }
+
+  /* ---- Card layouts ---- */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 20px 24px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .card:hover {
+    border-color: rgba(35, 37, 43, 0.15);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(35, 37, 43, 0.06);
+    padding-bottom: 12px;
+  }
+  .card-header h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 18px;
+    margin: 0;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .card-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Purple Customer Card Custom overrides */
+  .card.customer {
+    background: var(--brand-purple);
+    border: 1px solid var(--brand-purple-border);
+  }
+  .card.customer .card-header {
+    border-color: rgba(124, 111, 238, 0.12);
+  }
+  .card.customer .card-header h2 {
+    color: var(--brand-purple-ink);
+  }
+  .card.customer .card-icon {
+    color: var(--brand-purple-deep);
+  }
+  .card.customer label {
+    color: var(--brand-purple-ink);
+    opacity: 0.85;
+  }
+  .card.customer input {
+    background: var(--white);
+    border-color: rgba(124, 111, 238, 0.18);
+    color: var(--ink);
+  }
+  .card.customer input:focus {
+    border-color: var(--brand-purple-deep);
+    box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.15);
+  }
+
+  /* Teal Billing Card Custom overrides */
+  .card.billing {
+    background: var(--brand-teal);
+    border: 1px solid var(--brand-teal-border);
+  }
+  .card.billing .card-header {
+    border-color: rgba(31, 138, 118, 0.12);
+  }
+  .card.billing .card-header h2 {
+    color: var(--brand-teal-ink);
+  }
+  .card.billing .card-icon {
+    color: var(--brand-teal-deep);
+  }
+  .card.billing label {
+    color: var(--brand-teal-ink);
+    opacity: 0.85;
+  }
+  .card.billing input {
+    background: var(--white);
+    border-color: rgba(31, 138, 118, 0.18);
+    color: var(--ink);
+  }
+  .card.billing input:focus {
+    border-color: var(--brand-teal-deep);
+    box-shadow: 0 0 0 3px rgba(31, 138, 118, 0.15);
+  }
+
+  /* ---- Inputs and Fields ---- */
+  .input-group {
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .input-group:last-child {
+    margin-bottom: 0;
+  }
+  label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+  input, select {
+    width: 100%;
+    padding: 13px 15px;
+    font-size: 16px; /* Prevents iOS auto zoom on focus */
+    font-family: inherit;
+    font-weight: 500;
+    border: 1px solid rgba(35, 37, 43, 0.12);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--ink);
+    transition: all 0.25s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 46px;
+  }
+  input::placeholder {
+    color: rgba(35, 37, 43, 0.35);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236b6d78' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--brand-purple-deep);
+    box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.15);
+  }
+  input[readonly] {
+    background: rgba(35, 37, 43, 0.03) !important;
+    border-color: rgba(35, 37, 43, 0.08) !important;
+    color: var(--ink-muted) !important;
+    cursor: not-allowed;
+  }
+  input[type="date"] {
+    position: relative;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6d78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .hint {
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    display: block;
+  }
+  .input-error {
+    border-color: var(--rose) !important;
+    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.18) !important;
+  }
+  .err-msg {
+    color: var(--rose);
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* ---- Collapsible Accordion Items ---- */
+  .item-block {
+    border-radius: 22px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow-card);
+    border: 1px solid transparent;
+  }
+  .item-block.expanded {
+    box-shadow: var(--shadow-soft);
+    transform: translateY(-2px);
+  }
+  .item-block-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .item-block-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .item-block-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .item-block-summary {
+    display: flex;
+    flex-direction: column;
+    max-width: 180px; /* Responsive safety wrapping for header details */
+  }
+  .item-block-summary-title {
+    font-weight: 600;
+    font-size: 14.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-block-summary-desc {
+    font-size: 11px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-block-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .item-block-price {
+    font-weight: 700;
+    font-size: 13.5px;
+  }
+  .item-block-chevron {
+    width: 20px; height: 20px;
+    transition: transform 0.25s ease;
+  }
+  .item-block.expanded .item-block-chevron {
+    transform: rotate(180deg);
+  }
+  .item-block-body {
+    padding: 0 20px 22px;
+    display: none;
+    border-top: 1px solid rgba(35, 37, 43, 0.05);
+    animation: slide-down 0.25s ease-out;
+  }
+  .item-block.expanded .item-block-body {
+    display: block;
+  }
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .item-block-remove {
+    background: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.15);
+    color: var(--rose);
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+  }
+  .item-block-remove:hover {
+    background: var(--rose);
+    color: var(--white);
+    border-color: var(--rose);
+  }
+
+  /* Dynamic Alternating Color Themes for Piece Blocks */
+  .item-block:nth-of-type(4n+1) {
+    background: var(--brand-orange);
+    border-color: var(--brand-orange-border);
+  }
+  .item-block:nth-of-type(4n+1) .item-block-num {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: var(--brand-orange-border);
+    color: var(--brand-orange-ink);
+  }
+  .item-block:nth-of-type(4n+1) .item-block-summary-title { color: var(--brand-orange-ink); }
+  .item-block:nth-of-type(4n+1) .item-block-summary-desc { color: var(--brand-orange-ink); opacity: 0.8; }
+  .item-block:nth-of-type(4n+1) .item-block-price { color: var(--brand-orange-ink); }
+  .item-block:nth-of-type(4n+1) .item-block-chevron { color: var(--brand-orange-ink); }
+  .item-block:nth-of-type(4n+1) label { color: var(--brand-orange-ink); opacity: 0.85; }
+  .item-block:nth-of-type(4n+1) input, .item-block:nth-of-type(4n+1) select {
+    background: var(--white);
+    border-color: rgba(255, 138, 61, 0.18);
+    color: var(--ink);
+  }
+  .item-block:nth-of-type(4n+1) input:focus, .item-block:nth-of-type(4n+1) select:focus {
+    border-color: var(--brand-orange-deep);
+    box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.15);
+  }
+
+  .item-block:nth-of-type(4n+2) {
+    background: var(--brand-pink);
+    border-color: var(--brand-pink-border);
+  }
+  .item-block:nth-of-type(4n+2) .item-block-num {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: var(--brand-pink-border);
+    color: var(--brand-pink-ink);
+  }
+  .item-block:nth-of-type(4n+2) .item-block-summary-title { color: var(--brand-pink-ink); }
+  .item-block:nth-of-type(4n+2) .item-block-summary-desc { color: var(--brand-pink-ink); opacity: 0.8; }
+  .item-block:nth-of-type(4n+2) .item-block-price { color: var(--brand-pink-ink); }
+  .item-block:nth-of-type(4n+2) .item-block-chevron { color: var(--brand-pink-ink); }
+  .item-block:nth-of-type(4n+2) label { color: var(--brand-pink-ink); opacity: 0.85; }
+  .item-block:nth-of-type(4n+2) input, .item-block:nth-of-type(4n+2) select {
+    background: var(--white);
+    border-color: rgba(255, 111, 145, 0.18);
+    color: var(--ink);
+  }
+  .item-block:nth-of-type(4n+2) input:focus, .item-block:nth-of-type(4n+2) select:focus {
+    border-color: var(--brand-pink-deep);
+    box-shadow: 0 0 0 3px rgba(255, 111, 145, 0.15);
+  }
+
+  .item-block:nth-of-type(4n+3) {
+    background: var(--brand-purple);
+    border-color: var(--brand-purple-border);
+  }
+  .item-block:nth-of-type(4n+3) .item-block-num {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: var(--brand-purple-border);
+    color: var(--brand-purple-ink);
+  }
+  .item-block:nth-of-type(4n+3) .item-block-summary-title { color: var(--brand-purple-ink); }
+  .item-block:nth-of-type(4n+3) .item-block-summary-desc { color: var(--brand-purple-ink); opacity: 0.8; }
+  .item-block:nth-of-type(4n+3) .item-block-price { color: var(--brand-purple-ink); }
+  .item-block:nth-of-type(4n+3) .item-block-chevron { color: var(--brand-purple-ink); }
+  .item-block:nth-of-type(4n+3) label { color: var(--brand-purple-ink); opacity: 0.85; }
+  .item-block:nth-of-type(4n+3) input, .item-block:nth-of-type(4n+3) select {
+    background: var(--white);
+    border-color: rgba(124, 111, 238, 0.18);
+    color: var(--ink);
+  }
+  .item-block:nth-of-type(4n+3) input:focus, .item-block:nth-of-type(4n+3) select:focus {
+    border-color: var(--brand-purple-deep);
+    box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.15);
+  }
+
+  .item-block:nth-of-type(4n+0) {
+    background: var(--brand-blue);
+    border-color: var(--brand-blue-border);
+  }
+  .item-block:nth-of-type(4n+0) .item-block-num {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: var(--brand-blue-border);
+    color: var(--brand-blue-ink);
+  }
+  .item-block:nth-of-type(4n+0) .item-block-summary-title { color: var(--brand-blue-ink); }
+  .item-block:nth-of-type(4n+0) .item-block-summary-desc { color: var(--brand-blue-ink); opacity: 0.8; }
+  .item-block:nth-of-type(4n+0) .item-block-price { color: var(--brand-blue-ink); }
+  .item-block:nth-of-type(4n+0) .item-block-chevron { color: var(--brand-blue-ink); }
+  .item-block:nth-of-type(4n+0) label { color: var(--brand-blue-ink); opacity: 0.85; }
+  .item-block:nth-of-type(4n+0) input, .item-block:nth-of-type(4n+0) select {
+    background: var(--white);
+    border-color: rgba(2, 132, 199, 0.18);
+    color: var(--ink);
+  }
+  .item-block:nth-of-type(4n+0) input:focus, .item-block:nth-of-type(4n+0) select:focus {
+    border-color: var(--brand-blue-deep);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  }
+
+  /* ---- Measurement Grid ---- */
+  .measureContainer {
+    margin: 18px 0;
+  }
+  .measure-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(35, 37, 43, 0.05);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 8px;
+  }
+  .measure-input-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .measure-input-container label {
+    font-size: 11px;
+    margin-bottom: 4px;
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
+  }
+  .measure-input-container input {
+    background: var(--white);
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  /* ---- History Cards List ---- */
+  .history-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .history-card:hover {
+    border-color: rgba(35, 37, 43, 0.15);
+    transform: translateY(-2px);
+  }
+  .history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(35, 37, 43, 0.05);
+    padding-bottom: 10px;
+  }
+  .history-card-cust {
+    display: flex;
+    flex-direction: column;
+    max-width: 65%;
+  }
+  .history-card-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-card-phone {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+  }
+  .history-card-meta {
+    text-align: right;
+  }
+  .history-card-ticket {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--brand-purple-deep);
+    background: rgba(124, 111, 238, 0.08);
+    padding: 3px 8px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+  .history-card-date {
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    display: block;
+  }
+  .history-card-details {
+    margin-bottom: 14px;
+  }
+  .history-card-item-tag {
+    display: inline-block;
+    background: rgba(35, 37, 43, 0.04);
+    border: 1px solid rgba(35, 37, 43, 0.08);
+    font-size: 11.5px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    color: var(--ink-muted);
+    font-weight: 500;
+  }
+  .history-card-pricing {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink-muted);
+    border-top: 1px dotted rgba(35, 37, 43, 0.08);
+    padding-top: 12px;
+    margin-bottom: 16px;
+  }
+  .history-card-price-value {
+    color: var(--brand-teal-deep);
+    font-weight: 700;
+  }
+  .history-card-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .history-card-btn-view {
+    flex: 2;
+    background: rgba(124, 111, 238, 0.05);
+    border: 1px solid rgba(124, 111, 238, 0.15);
+    color: var(--brand-purple-deep);
+    font-weight: 700;
+    font-family: inherit;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+  }
+  .history-card-btn-view:hover {
+    background: var(--brand-purple-deep);
+    color: var(--white);
+  }
+  .history-card-btn-delete {
+    flex: 1;
+    background: rgba(244, 63, 94, 0.05);
+    border: 1px solid rgba(244, 63, 94, 0.15);
+    color: var(--rose);
+    font-weight: 700;
+    font-family: inherit;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
+  }
+  .history-card-btn-delete:hover {
+    background: var(--rose);
+    color: var(--white);
+  }
+  .history-card-btn-status {
+    background: rgba(31, 138, 118, 0.08);
+    border: 1px solid rgba(31, 138, 118, 0.2);
+    color: var(--brand-teal-deep);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .history-card-btn-status:hover {
+    background: var(--brand-teal-deep);
+    color: var(--white);
+  }
+
+  .history-empty-state {
+    text-align: center;
+    padding: 50px 24px;
+    background: var(--white);
+    border: 2px dashed rgba(35, 37, 43, 0.1);
+    border-radius: 24px;
+    color: var(--ink-muted);
+    box-shadow: var(--shadow-card);
+  }
+  .history-empty-state svg {
+    width: 48px; height: 48px;
+    color: var(--brand-purple-deep);
+    opacity: 0.4;
+    margin-bottom: 16px;
+  }
+  .history-empty-state h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin: 0 0 6px 0;
+  }
+  .history-empty-state p {
+    font-size: 13.5px;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ---- Ticket Modal Overlay popup ---- */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(35, 37, 43, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-card {
+    background: var(--white);
+    border-radius: 28px;
+    width: 100%;
+    max-width: 450px;
+    padding: 24px;
+    position: relative;
+    transform: scale(0.92);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    box-shadow: 0 25px 50px -12px rgba(35, 37, 43, 0.25);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-overlay.show .modal-card {
+    transform: scale(1);
+  }
+  .modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(35, 37, 43, 0.05);
+    border: 1px solid rgba(35, 37, 43, 0.08);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+  }
+  .modal-close-btn:hover {
+    background: var(--rose);
+    color: var(--white);
+    border-color: var(--rose);
+  }
+  .modal-content {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 4px;
+    margin-bottom: 20px;
+    margin-top: 14px;
+  }
+  .modal-action-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--brand-purple-deep);
+    color: var(--white);
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 48px;
+  }
+  .modal-action-btn:hover {
+    background: #6052df;
+  }
+
+  /* ---- Buttons & General Layout controls ---- */
+  .add-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    margin-top: 8px;
+  }
+  #addItemBtn {
+    background: var(--white);
+    border: 1.5px solid var(--brand-purple-border);
+    color: var(--brand-purple-deep);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-soft);
+    font-family: inherit;
+    height: 38px;
+  }
+  #addItemBtn:hover {
+    background: var(--brand-purple);
+    border-color: var(--brand-purple-deep);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(124, 111, 238, 0.15);
+  }
+  #addItemBtn:active {
+    transform: translateY(0);
+  }
+  .error {
+    color: var(--white);
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    color: var(--rose);
+    display: none;
+    animation: shake 0.3s ease-in-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* ---- Floating Glass Summary Bar ---- */
+  .summary-bar {
+    position: fixed;
+    left: 16px; right: 16px; bottom: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(35, 37, 43, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 12px 14px 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 12px 30px -8px rgba(35, 37, 43, 0.15);
+    z-index: 50;
+    max-width: 488px;
+    margin: 0 auto;
+  }
+  .summary-bar .total-tag {
+    flex: 1;
+  }
+  .summary-bar .total-tag .label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .summary-bar .total-tag .value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--brand-teal-deep);
+    display: block;
+  }
+  #footerBtn {
+    background: linear-gradient(135deg, var(--brand-teal-deep) 0%, #166e5d 100%);
+    color: var(--white);
+    font-weight: 700;
+    border-radius: 14px;
+    border: none;
+    padding: 14px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 4px 15px rgba(31, 138, 118, 0.25);
+    flex: 1.5;
+    height: 46px;
+  }
+  #footerBtn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  #footerBtn:disabled {
+    opacity: 0.55;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  /* ---- Custom Success Modal Overlay ---- */
+  .success-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(35, 37, 43, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .success-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .success-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 28px;
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 24px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px -10px rgba(35, 37, 43, 0.15);
+  }
+  .success-overlay.show .success-card {
+    transform: scale(1);
+  }
+  .success-checkmark {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.1);
+    border: 2px solid var(--emerald);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--emerald);
+  }
+  .success-checkmark svg {
+    width: 36px; height: 36px;
+  }
+  .success-card h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    color: var(--ink);
+  }
+  .success-card p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+  }
+  .success-summary {
+    background: rgba(35, 37, 43, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .success-summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+  }
+  .success-summary-row:last-child {
+    margin-bottom: 0;
+  }
+  .success-summary-row span {
+    color: var(--ink-muted);
+  }
+  .success-summary-row strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .success-close-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--brand-purple-deep) 0%, #6052df 100%);
+    color: var(--white);
+    font-weight: 700;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.1s ease;
+    height: 48px;
+  }
+  .success-close-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* ---- Tailwind-enhanced mobile polish ---- */
+  body {
+    background-image:
+      radial-gradient(circle at top left, rgba(255, 111, 145, 0.22), transparent 34%),
+      radial-gradient(circle at 88% 12%, rgba(31, 138, 118, 0.18), transparent 30%),
+      linear-gradient(135deg, #fffaf3 0%, #f7ecdf 50%, #eefaf7 100%);
+  }
+  .brand-card {
+    background: linear-gradient(135deg, rgba(255, 225, 234, 0.96), rgba(233, 228, 255, 0.96));
+    border-color: rgba(255, 255, 255, 0.82);
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0 24px 60px -24px rgba(124, 111, 238, 0.35), 0 10px 24px -16px rgba(35, 37, 43, 0.2);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .brand-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -30px -55px auto;
+    width: 150px;
+    height: 150px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.45);
+    z-index: -1;
+  }
+  .card, .history-card, .receipt-ticket {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .summary-bar {
+    background: rgba(255, 255, 255, 0.93);
+    border-color: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 20px 50px -18px rgba(35, 37, 43, 0.32);
+  }
+  #footerBtn {
+    background: linear-gradient(135deg, #1f8a76 0%, #7c6fee 100%);
+    box-shadow: 0 14px 30px -13px rgba(124, 111, 238, 0.9);
+  }
+  .sheet-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .sheet-status.synced {
+    color: #0f766e;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  .sheet-status.pending {
+    color: #9a3412;
+    background: rgba(255, 138, 61, 0.14);
+    border: 1px solid rgba(255, 138, 61, 0.22);
+  }
+</style>
+</head>
+<body>
+
+<main>
+
+  <!-- Brand Header Card -->
+  <div class="brand-card">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="6" cy="6" r="3"></circle>
+        <circle cx="6" cy="18" r="3"></circle>
+        <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+        <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+        <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>Sardar Tailoring</h1>
+      <p>Bespoke Ticket Console</p>
+    </div>
+  </div>
+
+  <!-- Navigation Tab Switcher -->
+  <div class="tab-switcher">
+    <button type="button" class="tab-btn active" id="tabNewOrder" onclick="switchTab('new-order')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+      New Order
+    </button>
+    <button type="button" class="tab-btn" id="tabHistory" onclick="switchTab('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      History <span class="history-badge" id="historyBadge">0</span>
+    </button>
+  </div>
+
+  <!-- Form Container (New Ticket view) -->
+  <div id="orderFormContainer">
+    <form id="orderForm">
+
+      <!-- Section 1: Customer Details -->
+      <div class="section-title-container">
+        <span class="section-title-dot"></span>
+        <h2>Customer</h2>
+      </div>
+
+      <div class="card customer">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <h2>Customer Profile</h2>
+        </div>
+        
+        <div class="input-group">
+          <label for="customerName">Customer Name</label>
+          <input type="text" id="customerName" required placeholder="Enter customer full name">
+        </div>
+
+        <div class="input-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel" id="phoneNumber" required placeholder="98XXXXXXXX" pattern="[0-9]{10}">
+          <span class="hint">Please enter a valid 10-digit mobile number</span>
+        </div>
+      </div>
+
+      <!-- Section 2: Pieces selection -->
+      <div class="section-title-container">
+        <span class="section-title-dot pieces"></span>
+        <h2>Tailoring Items</h2>
+      </div>
+
+      <div id="itemsContainer"></div>
+
+      <div class="add-btn-wrapper">
+        <button type="button" id="addItemBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Piece
+        </button>
+      </div>
+
+      <!-- Section 3: Billing & Delivery Details -->
+      <div class="section-title-container">
+        <span class="section-title-dot billing"></span>
+        <h2>Billing &amp; Delivery</h2>
+      </div>
+
+      <div class="card billing">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <h2>Advance &amp; Pick-up</h2>
+        </div>
+
+        <div class="input-group">
+          <label for="advance">Advance Paid (NPR)</label>
+          <input type="number" id="advance" required min="0" value="0" placeholder="0">
+        </div>
+
+        <div class="input-group">
+          <label for="deliveryDate">Delivery Promise Date</label>
+          <input type="date" id="deliveryDate" required>
+        </div>
+      </div>
+
+      <!-- Section 4: Live preview Ticket -->
+      <div class="section-title-container">
+        <span class="section-title-dot receipt"></span>
+        <h2>Bespoke Ticket Preview</h2>
+      </div>
+
+      <div class="receipt-ticket" id="receiptPreview">
+        <!-- Will be dynamically populated on load -->
+      </div>
+
+      <!-- Hidden input for total to maintain backward compatibility -->
+      <input type="number" id="totalPrice" readonly style="display:none;">
+
+      <!-- Error message alert panel -->
+      <div class="error" id="errorMsg">Please correct invalid fields before submitting.</div>
+
+      <!-- Sticky Floating Action Footer bar -->
+      <div class="summary-bar">
+        <div class="total-tag">
+          <span class="label">Total</span>
+          <span class="value" id="footerTotal">NPR 0</span>
+        </div>
+        <button type="submit" id="footerBtn">Submit Order</button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- History Dashboard container (History view) -->
+  <div id="orderHistoryContainer" style="display: none;">
+    <div class="section-title-container" style="margin-top: 0;">
+      <span class="section-title-dot pieces"></span>
+      <h2>Order Logs History</h2>
+    </div>
+    
+    <div id="historyListContainer">
+      <!-- Will be populated from localStorage -->
+    </div>
+  </div>
+
+</main>
+
+<!-- Ticket Receipt Modal popup -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal-card">
+    <button type="button" class="modal-close-btn" onclick="closeReceiptModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="modal-content" id="modalReceiptContent">
+      <!-- Historical receipt ticket content here -->
+    </div>
+    <button type="button" class="modal-action-btn" onclick="closeReceiptModal()">Close Receipt</button>
+  </div>
+</div>
+
+<!-- Full-screen success feedback layout -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-checkmark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h2>Order Submitted!</h2>
+    <p>The tailoring order ticket has been successfully compiled and sent to the server.</p>
+    
+    <div class="success-summary">
+      <div class="success-summary-row">
+        <span>Client Name:</span>
+        <strong id="successCustName">-</strong>
+      </div>
+      <div class="success-summary-row">
+        <span>Total Price:</span>
+        <strong id="successTotal">-</strong>
+      </div>
+      <div class="success-summary-row">
+        <span>Balance Remaining:</span>
+        <strong id="successBalance">-</strong>
+      </div>
+      <div class="success-summary-row">
+        <span>Delivery Date:</span>
+        <strong id="successDelivery">-</strong>
+      </div>
+    </div>
+
+    <div id="successQrSection" style="text-align:center;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-muted);margin-bottom:8px;">Scan to Pay Balance</div>
+      <img src="payment-qr.png" alt="Scan to Pay - Piyush Shopping Center" style="max-width:170px;width:100%;border-radius:12px;border:1px solid rgba(35,37,43,0.08);">
+    </div>
+
+    <button type="button" class="success-close-btn" id="successCloseBtn">Create Another Order</button>
+  </div>
+</div>
+
+<script>
+  const tg = window.Telegram ? window.Telegram.WebApp : null;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  const measurementFields = {
+    'Pant': ['Waist', 'Hip', 'Length', 'Thigh', 'Mori', 'Lataak'],
+    'Shirt': ['Chest', 'Shoulder', 'Sleeve Length', 'Length', 'Collar'],
+    'Coat': ['Chest', 'Shoulder', 'Sleeve Length', 'Length', 'Waist'],
+    'Blazer': ['Chest', 'Shoulder', 'Sleeve Length', 'Length', 'Waist'],
+    'Safari Suit': ['Chest', 'Shoulder', 'Sleeve Length', 'Coat Length', 'Waist', 'Hip', 'Pant Length'],
+    'Kurta': ['Chest', 'Shoulder', 'Length', 'Sleeve Length'],
+    'Other': []
+  };
+
+  let itemCounter = 0;
+  const itemsContainer = document.getElementById('itemsContainer');
+  const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzIisMDZactckG09LIRgjm3nvBrmqDwzIoUF5_pgY6oSTt3gvR7owyqn9dtvp4CYX8FEQ/exec';
+
+  // Tab Navigation Switching
+  window.switchTab = function(tabId) {
+    const formContainer = document.getElementById('orderFormContainer');
+    const historyContainer = document.getElementById('orderHistoryContainer');
+    const tabNewOrderBtn = document.getElementById('tabNewOrder');
+    const tabHistoryBtn = document.getElementById('tabHistory');
+    const summaryBar = document.querySelector('.summary-bar');
+
+    if (tabId === 'new-order') {
+      formContainer.style.display = 'block';
+      historyContainer.style.display = 'none';
+      tabNewOrderBtn.classList.add('active');
+      tabHistoryBtn.classList.remove('active');
+      summaryBar.style.display = 'flex';
+    } else if (tabId === 'history') {
+      formContainer.style.display = 'none';
+      historyContainer.style.display = 'block';
+      tabNewOrderBtn.classList.remove('active');
+      tabHistoryBtn.classList.add('active');
+      summaryBar.style.display = 'none';
+      renderHistoryList();
+    }
+  }
+
+  // Input Error Visual Indicators
+  function showInputError(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('input-error');
+    
+    const parent = el.closest('.input-group');
+    if (parent) {
+      let errSpan = parent.querySelector('.err-msg');
+      if (!errSpan) {
+        errSpan = document.createElement('span');
+        errSpan.className = 'err-msg';
+        parent.appendChild(errSpan);
+      }
+      errSpan.textContent = msg;
+      errSpan.style.display = 'block';
+    }
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    document.querySelectorAll('.err-msg').forEach(el => el.style.display = 'none');
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+
+  function showGlobalError(msg) {
+    const err = document.getElementById('errorMsg');
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+
+  // Client-Side Validation Rules for the Entire Form
+  function validateForm() {
+    let isValid = true;
+    clearErrors();
+
+    // Validate customer details
+    const name = document.getElementById('customerName').value.trim();
+    const phone = document.getElementById('phoneNumber').value.trim();
+
+    if (!name) {
+      showInputError('customerName', 'Customer name is required');
+      isValid = false;
+    }
+    if (!phone) {
+      showInputError('phoneNumber', 'Phone number is required');
+      isValid = false;
+    } else if (!/^[0-9]{10}$/.test(phone)) {
+      showInputError('phoneNumber', 'Must be a 10-digit number');
+      isValid = false;
+    }
+
+    // Validate added tailoring pieces
+    const blocks = itemsContainer.querySelectorAll('.item-block');
+    if (blocks.length === 0) {
+      showGlobalError('Please add at least one tailoring piece before submitting.');
+      isValid = false;
+    } else {
+      blocks.forEach(block => {
+        const id = block.dataset.id;
+        const typeSelect = block.querySelector('.itemTypeSelect');
+        const priceInput = block.querySelector('.priceInput');
+
+        if (!typeSelect.value) {
+          typeSelect.classList.add('input-error');
+          isValid = false;
+        }
+
+        if (!priceInput.value || Number(priceInput.value) <= 0) {
+          priceInput.classList.add('input-error');
+          isValid = false;
+        }
+      });
+
+      if (!isValid) {
+        showGlobalError('Please specify Item Type and Price for all clothing pieces.');
+      }
+    }
+
+    // Validate billing details
+    const advance = document.getElementById('advance').value;
+    const deliveryDate = document.getElementById('deliveryDate').value;
+
+    if (advance === '' || Number(advance) < 0) {
+      showInputError('advance', 'Advance must be 0 or more');
+      isValid = false;
+    }
+    if (!deliveryDate) {
+      showInputError('deliveryDate', 'Delivery promise date is required');
+      isValid = false;
+    }
+
+    if (!isValid) {
+      const err = document.getElementById('errorMsg');
+      err.style.display = 'block';
+
+      // Scroll to the first validation error
+      const firstError = document.querySelector('.input-error');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        document.getElementById('errorMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    return isValid;
+  }
+
+  // Dynamic Accordion Clothing Items
+  function addItemBlock() {
+    const id = itemCounter++;
+    const block = document.createElement('div');
+    block.className = 'item-block expanded';
+    block.dataset.id = id;
+
+    // Collapse other open accordion drawers
+    itemsContainer.querySelectorAll('.item-block').forEach(b => {
+      b.classList.remove('expanded');
+    });
+
+    const isFirst = (itemsContainer.children.length === 0);
+
+    block.innerHTML = `
+      <div class="item-block-header">
+        <div class="item-block-title">
+          <span class="item-block-num">${itemsContainer.children.length + 1}</span>
+          <div class="item-block-summary">
+            <span class="item-block-summary-title">New Clothing Piece</span>
+            <span class="item-block-summary-desc">Select item details...</span>
+          </div>
+        </div>
+        <div class="item-block-header-right">
+          <span class="item-block-price">--</span>
+          ${!isFirst ? `
+            <button type="button" class="item-block-remove" data-remove="${id}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Remove
+            </button>
+          ` : ''}
+          <svg class="item-block-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+      <div class="item-block-body">
+        <div class="input-group">
+          <label>Item Type</label>
+          <select class="itemTypeSelect" data-field="itemType" data-id="${id}" required>
+            <option value="">Select item</option>
+            <option>Pant</option>
+            <option>Shirt</option>
+            <option>Coat</option>
+            <option>Safari Suit</option>
+            <option>Kurta</option>
+            <option>Blazer</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Fabric Type</label>
+          <select class="fabricSelect" data-field="fabricType" data-id="${id}">
+            <option value="">Select fabric</option>
+            <option>Cotton</option>
+            <option>Wool Blend</option>
+            <option>Linen</option>
+            <option>Silk</option>
+            <option>Dhaka</option>
+            <option>Polyester</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Color / Design</label>
+          <input type="text" class="colorInput" data-field="colorDesign" data-id="${id}" placeholder="e.g. Navy Pinstripe">
+        </div>
+
+        <div class="measureContainer" data-id="${id}">
+          <label>Measurements</label>
+          <div class="hint">Select an item type above to see matching measurement fields</div>
+        </div>
+
+        <div class="input-group">
+          <label>Item Price (NPR)</label>
+          <input type="number" class="priceInput" data-field="price" data-id="${id}" min="0" required placeholder="0">
+        </div>
+
+        <div class="input-group">
+          <label>Notes (optional)</label>
+          <textarea class="notesInput" data-field="notes" data-id="${id}" rows="2" placeholder="e.g. Loose fit, extra pocket, customer preference..." style="width:100%;font-family:inherit;font-size:14px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-color);resize:vertical;background:var(--white);color:var(--ink);"></textarea>
+        </div>
+      </div>
+    `;
+
+    itemsContainer.appendChild(block);
+    
+    // Quick entry scale transition
+    block.style.opacity = '0';
+    block.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      block.style.transition = 'all 0.25s ease';
+      block.style.opacity = '1';
+      block.style.transform = 'translateY(0)';
+    }, 10);
+
+    updateAllAccordionHeaders();
+    recalcTotal();
+    renderReceiptPreview();
+    return block;
+  }
+
+  function renderMeasurementFields(id, itemType) {
+    const container = itemsContainer.querySelector('.measureContainer[data-id="' + id + '"]');
+    const fields = measurementFields[itemType] || [];
+
+    if (!itemType) {
+      container.innerHTML = '<label>Measurements</label><div class="hint">Select an item type above to see matching measurement fields</div>';
+      return;
+    }
+
+    if (fields.length === 0) {
+      container.innerHTML = `
+        <div class="input-group">
+          <label>Custom Measurements</label>
+          <input type="text" class="measureFreeText" data-id="${id}" placeholder="e.g. Neck 15, Chest 42, Sleeve 25">
+        </div>
+      `;
+      return;
+    }
+
+    let html = '<label style="margin-bottom:8px;">Measurements (inches)</label><div class="measure-grid">';
+    for (let i = 0; i < fields.length; i++) {
+      html += `
+        <div class="measure-input-container">
+          <label>${fields[i]}</label>
+          <input type="number" step="0.1" class="measure-input" data-field="${fields[i]}" data-id="${id}" placeholder="0.0">
+        </div>
+      `;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function updateAccordionHeader(id) {
+    const block = itemsContainer.querySelector('.item-block[data-id="' + id + '"]');
+    if (!block) return;
+
+    const typeSelect = block.querySelector('.itemTypeSelect');
+    const fabricSelect = block.querySelector('.fabricSelect');
+    const colorInput = block.querySelector('.colorInput');
+    const priceInput = block.querySelector('.priceInput');
+
+    const titleEl = block.querySelector('.item-block-summary-title');
+    const descEl = block.querySelector('.item-block-summary-desc');
+    const priceEl = block.querySelector('.item-block-price');
+
+    const typeText = typeSelect.value || 'New Clothing Piece';
+    const fabricText = fabricSelect.value || '';
+    const colorText = colorInput.value.trim() || '';
+
+    titleEl.textContent = 'Piece #' + (Array.from(itemsContainer.children).indexOf(block) + 1) + ': ' + typeText;
+    
+    let desc = [];
+    if (fabricText) desc.push(fabricText);
+    if (colorText) desc.push(colorText);
+    descEl.textContent = desc.join(', ') || 'Select item details...';
+
+    const priceVal = Number(priceInput.value) || 0;
+    priceEl.textContent = priceVal > 0 ? 'NPR ' + priceVal.toLocaleString('en-IN') : '--';
+  }
+
+  function updateAllAccordionHeaders() {
+    const blocks = itemsContainer.querySelectorAll('.item-block');
+    blocks.forEach((block, idx) => {
+      const id = block.dataset.id;
+      const numBadge = block.querySelector('.item-block-num');
+      if (numBadge) numBadge.textContent = idx + 1;
+      updateAccordionHeader(id);
+    });
+  }
+
+  function recalcTotal() {
+    const priceInputs = itemsContainer.querySelectorAll('.priceInput');
+    let total = 0;
+    priceInputs.forEach(function (input) {
+      total += Number(input.value) || 0;
+    });
+    
+    document.getElementById('totalPrice').value = total;
+    const formatted = 'NPR ' + total.toLocaleString('en-IN');
+    document.getElementById('footerTotal').textContent = formatted;
+  }
+
+  function collectMeasurementsForItem(id) {
+    const freeText = itemsContainer.querySelector('.measureFreeText[data-id="' + id + '"]');
+    if (freeText) return freeText.value.trim();
+    
+    const inputs = itemsContainer.querySelectorAll('.measure-input[data-id="' + id + '"]');
+    const parts = [];
+    inputs.forEach(function (input) {
+      if (input.value) parts.push(input.dataset.field + ' ' + input.value + '"');
+    });
+    return parts.join(', ');
+  }
+
+  function collectNotesForItem(id) {
+    const notesEl = itemsContainer.querySelector('.notesInput[data-id="' + id + '"]');
+    return notesEl ? notesEl.value.trim() : '';
+  }
+
+  function collectMeasurementValuesForItem(id) {
+    const freeText = itemsContainer.querySelector('.measureFreeText[data-id="' + id + '"]');
+    if (freeText) return { freeText: freeText.value.trim(), fields: {} };
+
+    const values = {};
+    const inputs = itemsContainer.querySelectorAll('.measure-input[data-id="' + id + '"]');
+    inputs.forEach(function (input) {
+      if (input.value) values[input.dataset.field] = input.value;
+    });
+    return { freeText: '', fields: values };
+  }
+
+  function saveCurrentDraft() {
+    const blocks = itemsContainer.querySelectorAll('.item-block');
+    const pieces = [];
+
+    blocks.forEach(function (block) {
+      const id = block.dataset.id;
+      pieces.push({
+        itemType: block.querySelector('.itemTypeSelect').value,
+        fabricType: block.querySelector('.fabricSelect').value,
+        colorDesign: block.querySelector('.colorInput').value.trim(),
+        price: block.querySelector('.priceInput').value,
+        measurements: collectMeasurementValuesForItem(id)
+      });
+    });
+
+    const draft = {
+      savedAt: new Date().toISOString(),
+      customerName: document.getElementById('customerName').value.trim(),
+      phoneNumber: document.getElementById('phoneNumber').value.trim(),
+      advance: document.getElementById('advance').value,
+      deliveryDate: document.getElementById('deliveryDate').value,
+      pieces: pieces
+    };
+
+    try {
+      localStorage.setItem('sardar_tailoring_current_draft', JSON.stringify(draft));
+    } catch (e) {
+      console.error('Error saving local draft:', e);
+    }
+  }
+
+  function restoreCurrentDraft() {
+    let draft = null;
+    try {
+      const stored = localStorage.getItem('sardar_tailoring_current_draft');
+      if (stored) draft = JSON.parse(stored);
+    } catch (e) {
+      console.error('Error restoring local draft:', e);
+    }
+
+    if (!draft || !draft.pieces || draft.pieces.length === 0) return false;
+    const hasSavedWork = draft.customerName || draft.phoneNumber || draft.deliveryDate || draft.pieces.some(function (piece) {
+      return piece.itemType || piece.fabricType || piece.colorDesign || piece.price || piece.measurements.freeText || Object.keys(piece.measurements.fields || {}).length > 0;
+    });
+    if (!hasSavedWork) return false;
+
+    document.getElementById('customerName').value = draft.customerName || '';
+    document.getElementById('phoneNumber').value = draft.phoneNumber || '';
+    document.getElementById('advance').value = draft.advance || '0';
+    document.getElementById('deliveryDate').value = draft.deliveryDate || '';
+
+    itemsContainer.innerHTML = '';
+    itemCounter = 0;
+
+    draft.pieces.forEach(function (piece) {
+      const block = addItemBlock();
+      const id = block.dataset.id;
+      block.querySelector('.itemTypeSelect').value = piece.itemType || '';
+      block.querySelector('.fabricSelect').value = piece.fabricType || '';
+      block.querySelector('.colorInput').value = piece.colorDesign || '';
+      block.querySelector('.priceInput').value = piece.price || '';
+      renderMeasurementFields(id, piece.itemType || '');
+
+      if (piece.measurements && piece.measurements.freeText) {
+        const freeText = block.querySelector('.measureFreeText');
+        if (freeText) freeText.value = piece.measurements.freeText;
+      }
+
+      if (piece.measurements && piece.measurements.fields) {
+        block.querySelectorAll('.measure-input').forEach(function (input) {
+          input.value = piece.measurements.fields[input.dataset.field] || '';
+        });
+      }
+    });
+
+    updateAllAccordionHeaders();
+    recalcTotal();
+    renderReceiptPreview();
+    return true;
+  }
+
+  // Universal Ticket Receipt Generator (Used for preview and history popups)
+  function generateReceiptHTML(order) {
+    const total = order.totalPrice;
+    const advance = order.advancePaid;
+    const balance = total - advance;
+    
+    let itemsHtml = '';
+    for (let i = 0; i < order.itemTypes.length; i++) {
+      const type = order.itemTypes[i] || 'Unselected';
+      const fabric = order.fabricTypes[i] || '-';
+      const color = order.colorDesigns[i] || '-';
+      const price = (order.itemPrices && order.itemPrices[i]) || 0;
+      const measurements = order.measurementsList[i] || '';
+      const notes = (order.notesList && order.notesList[i]) || '';
+
+      itemsHtml += `
+        <div class="receipt-item-row">
+          <div class="receipt-item-head">
+            <span>Piece #${i + 1}: ${type}</span>
+            <span>NPR ${price.toLocaleString('en-IN')}</span>
+          </div>
+          <div class="receipt-item-details">Fabric: ${fabric} | Style: ${color}</div>
+          ${measurements ? `<div class="receipt-item-measurements">Measurements: ${measurements}</div>` : ''}
+          ${notes ? `<div class="receipt-item-measurements" style="font-style:italic;">Note: ${notes}</div>` : ''}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="receipt-header">
+        <div class="receipt-logo">SARDAR TAILORING</div>
+        <div class="receipt-subtitle">Bespoke Suit & Tailoring Shop</div>
+        <div class="receipt-date-id">
+          <span>Date: ${order.dateSubmitted}</span>
+          <span>Ticket: <strong>${order.ticketId}</strong></span>
+        </div>
+      </div>
+      <div class="receipt-section">
+        <div class="receipt-section-title">Customer Details</div>
+        <div class="receipt-cust-info">
+          <div class="receipt-cust-row"><strong>Name:</strong> ${order.customerName}</div>
+          <div class="receipt-cust-row"><strong>Phone:</strong> ${order.phoneNumber}</div>
+        </div>
+      </div>
+      <div class="receipt-section">
+        <div class="receipt-section-title">Order Breakdown</div>
+        <div class="receipt-item-list">
+          ${itemsHtml}
+        </div>
+      </div>
+      <div class="receipt-pricing">
+        <div class="receipt-price-row">
+          <span>Total Order Cost</span>
+          <span>NPR ${total.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="receipt-price-row">
+          <span>Advance Paid</span>
+          <span>NPR ${advance.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="receipt-price-row grand-total">
+          <span>Grand Total</span>
+          <span>NPR ${total.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="receipt-price-row balance">
+          <span>Balance Due</span>
+          <span>NPR ${balance.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="receipt-price-row" style="margin-top:6px; font-weight:600;">
+          <span>Delivery Promise</span>
+          <span>${order.deliveryDate}</span>
+        </div>
+      </div>
+      ${balance > 0 ? `
+      <div class="receipt-section" style="text-align:center;">
+        <div class="receipt-section-title">Pay Balance Online</div>
+        <img src="payment-qr.png" alt="Scan to Pay - Piyush Shopping Center" style="max-width:180px;width:100%;margin:8px auto 4px;display:block;border-radius:12px;border:1px solid rgba(35,37,43,0.08);">
+        <div style="font-size:11px;color:var(--ink-muted);">Scan with any Fonepay / eSewa app</div>
+      </div>
+      ` : ''}
+      <div class="receipt-footer-note">
+        Thank you for choosing Sardar Tailoring. Keep this ticket for pick-up reference.
+      </div>
+    `;
+  }
+
+  // Live Ticket Receipt Preview
+  function renderReceiptPreview() {
+    const customerName = document.getElementById('customerName').value.trim() || 'Client';
+    const phoneNumber = document.getElementById('phoneNumber').value.trim() || '--';
+    const advance = Number(document.getElementById('advance').value) || 0;
+    const deliveryDateRaw = document.getElementById('deliveryDate').value;
+
+    let deliveryDateFormatted = '--';
+    if (deliveryDateRaw) {
+      const parts = deliveryDateRaw.split('-');
+      if (parts.length === 3) {
+        deliveryDateFormatted = parts[2] + '-' + parts[1] + '-' + parts[0];
+      }
+    }
+
+    const dateToday = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    
+    const blocks = itemsContainer.querySelectorAll('.item-block');
+    const itemTypes = [];
+    const fabricTypes = [];
+    const colorDesigns = [];
+    const itemPrices = [];
+    const measurementsList = [];
+    const notesList = [];
+    let total = 0;
+
+    blocks.forEach(block => {
+      const id = block.dataset.id;
+      const itemType = block.querySelector('.itemTypeSelect').value || 'Unselected';
+      const fabricType = block.querySelector('.fabricSelect').value || '-';
+      const colorDesign = block.querySelector('.colorInput').value.trim() || '-';
+      const price = Number(block.querySelector('.priceInput').value) || 0;
+      const measurements = collectMeasurementsForItem(id);
+      const notes = collectNotesForItem(id);
+
+      itemTypes.push(itemType);
+      fabricTypes.push(fabricType);
+      colorDesigns.push(colorDesign);
+      itemPrices.push(price);
+      measurementsList.push(measurements);
+      notesList.push(notes);
+      total += price;
+    });
+
+    const currentOrderMock = {
+      ticketId: 'ST-PREVIEW',
+      dateSubmitted: dateToday,
+      customerName: customerName,
+      phoneNumber: phoneNumber,
+      itemTypes: itemTypes,
+      fabricTypes: fabricTypes,
+      colorDesigns: colorDesigns,
+      itemPrices: itemPrices,
+      measurementsList: measurementsList,
+      notesList: notesList,
+      totalPrice: total,
+      advancePaid: advance,
+      deliveryDate: deliveryDateFormatted
+    };
+
+    const container = document.getElementById('receiptPreview');
+    if (blocks.length === 0) {
+      container.innerHTML = `
+        <div class="receipt-header">
+          <div class="receipt-logo">SARDAR TAILORING</div>
+          <div class="receipt-subtitle">Bespoke Suit & Tailoring Shop</div>
+        </div>
+        <div style="color:#726e64;font-style:italic;text-align:center;padding:24px 0;">No tailoring pieces added yet</div>
+      `;
+    } else {
+      container.innerHTML = generateReceiptHTML(currentOrderMock);
+    }
+  }
+
+  // Local Storage Logs Database API
+  function logSubmittedOrder(orderObj) {
+    let history = [];
+    try {
+      const stored = localStorage.getItem('sardar_tailoring_orders');
+      if (stored) history = JSON.parse(stored);
+    } catch (e) {
+      console.error('Error reading localStorage logs:', e);
+    }
+
+    history = history.filter(function (order) {
+      return order.ticketId !== orderObj.ticketId;
+    });
+    history.unshift(orderObj);
+
+    try {
+      localStorage.setItem('sardar_tailoring_orders', JSON.stringify(history));
+    } catch (e) {
+      console.error('Error writing to localStorage logs:', e);
+    }
+
+    updateHistoryBadge();
+  }
+
+  function markOrderOnlineSubmitted(ticketId) {
+    let history = [];
+    try {
+      const stored = localStorage.getItem('sardar_tailoring_orders');
+      if (stored) history = JSON.parse(stored);
+    } catch (e) {
+      console.error('Error reading localStorage logs:', e);
+    }
+
+    history = history.map(function (order) {
+      if (order.ticketId !== ticketId) return order;
+      return Object.assign({}, order, {
+        onlineSubmitted: true,
+        onlineSubmittedAt: new Date().toISOString()
+      });
+    });
+
+    try {
+      localStorage.setItem('sardar_tailoring_orders', JSON.stringify(history));
+    } catch (e) {
+      console.error('Error updating online submission status:', e);
+    }
+
+    renderHistoryList();
+  }
+
+  function sendOrderToSheet(payload, ticketId) {
+    const sheetPayload = Object.assign({}, payload, { ticketId: ticketId });
+    return fetch(GOOGLE_SHEETS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(sheetPayload)
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('Network error: ' + res.status);
+      return res.json();
+    })
+    .then(function (result) {
+      if (!result || result.ok !== true) {
+        throw new Error((result && result.error) || 'Google Sheets did not confirm the save');
+      }
+      markOrderOnlineSubmitted(ticketId);
+      return result;
+    });
+  }
+
+  function retryPendingSheetOrders() {
+    let history = [];
+    try {
+      const stored = localStorage.getItem('sardar_tailoring_orders');
+      if (stored) history = JSON.parse(stored);
+    } catch (e) {
+      console.error('Error reading localStorage logs:', e);
+    }
+
+    history
+      .filter(function (order) {
+        return !order.onlineSubmitted && order.sheetPayload;
+      })
+      .forEach(function (order) {
+        sendOrderToSheet(order.sheetPayload, order.ticketId).catch(function (err) {
+          console.error('Sheet retry failed for ' + order.ticketId + ':', err);
+        });
+      });
+  }
+
+  window.deleteHistoryTicket = function(index) {
+    if (!confirm('Are you sure you want to delete this order? This cannot be undone.')) return;
+
+    if (renderedHistoryIsOffline) {
+      let history = getLocalHistory();
+      history.splice(index, 1);
+      try {
+        localStorage.setItem('sardar_tailoring_orders', JSON.stringify(history));
+      } catch (e) {
+        console.error(e);
+      }
+      renderHistoryList();
+      updateHistoryBadge();
+      return;
+    }
+
+    const order = renderedHistory[index];
+    if (!order) return;
+
+    const cardEl = listContainerCardAt(index);
+    if (cardEl) cardEl.style.opacity = '0.5';
+
+    fetch(GOOGLE_SHEETS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'delete', ticketId: order.ticketId })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Network error: ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        renderHistoryList();
+        updateHistoryBadge();
+      })
+      .catch(function (err) {
+        console.error(err);
+        alert('Could not delete this order right now. Check your internet connection and try again.');
+        if (cardEl) cardEl.style.opacity = '1';
+      });
+  }
+
+  function listContainerCardAt(index) {
+    const cards = document.querySelectorAll('#historyListContainer .history-card');
+    return cards[index] || null;
+  }
+
+  window.viewHistoryTicket = function(index) {
+    const order = renderedHistory[index];
+    if (!order) return;
+
+    const modalContent = document.getElementById('modalReceiptContent');
+    modalContent.innerHTML = generateReceiptHTML(order);
+
+    const modal = document.getElementById('receiptModal');
+    modal.classList.add('show');
+  }
+
+  window.closeReceiptModal = function() {
+    const modal = document.getElementById('receiptModal');
+    modal.classList.remove('show');
+  }
+
+  function updateOrderStatus(ticketId, statusPatch) {
+    return fetch(GOOGLE_SHEETS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action: 'updateStatus', ticketId: ticketId }, statusPatch))
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Network error: ' + res.status);
+      return res.json();
+    });
+  }
+
+  window.markDelivered = function(index) {
+    const order = renderedHistory[index];
+    if (!order) return;
+    if (!confirm('Mark this order as Delivered?')) return;
+
+    updateOrderStatus(order.ticketId, { delivered: true })
+      .then(function () { renderHistoryList(); })
+      .catch(function (err) {
+        console.error(err);
+        alert('Could not update status right now. Check your internet connection and try again.');
+      });
+  }
+
+  window.markFullyPaid = function(index) {
+    const order = renderedHistory[index];
+    if (!order) return;
+    if (!confirm('Mark this order as Fully Paid?')) return;
+
+    updateOrderStatus(order.ticketId, { fullyPaid: true })
+      .then(function () { renderHistoryList(); })
+      .catch(function (err) {
+        console.error(err);
+        alert('Could not update status right now. Check your internet connection and try again.');
+      });
+  }
+
+  let renderedHistory = [];
+  let renderedHistoryIsOffline = false;
+
+  function fetchOrdersFromSheet() {
+    return fetch(GOOGLE_SHEETS_API_URL, { method: 'GET' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Network error: ' + res.status);
+        return res.json();
+      })
+      .then(function (rows) {
+        if (!Array.isArray(rows)) throw new Error('Invalid Google Sheets response');
+        return rows.filter(function (row) {
+          if (!row || typeof row !== 'object') return false;
+          // Ignore blank/ghost rows that create empty History cards.
+          return String(row.TicketID || '').trim() ||
+                 String(row.CustomerName || '').trim() ||
+                 String(row.PhoneNumber || '').trim() ||
+                 String(row.ItemTypes || '').trim() ||
+                 Number(row.TotalPrice) > 0;
+        }).map(function (row) {
+          const total = Number(row.TotalPrice) || 0;
+          const advancePaid = Number(row.AdvancePaid) || 0;
+          let dateSubmitted = '-';
+          if (row.Timestamp) {
+            const d = new Date(row.Timestamp);
+            if (!isNaN(d)) dateSubmitted = d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          }
+          return {
+            ticketId: row.TicketID || '-',
+            dateSubmitted: dateSubmitted,
+            customerName: row.CustomerName || '-',
+            phoneNumber: row.PhoneNumber || '-',
+            itemTypes: String(row.ItemTypes || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+            fabricTypes: String(row.FabricTypes || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+            colorDesigns: String(row.ColorDesigns || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+            measurementsList: String(row.Measurements || '').split('|').map(function (s) { return s.trim(); }),
+            notesList: String(row.Notes || '').split('|').map(function (s) { return s.trim(); }),
+            totalPrice: total,
+            advancePaid: advancePaid,
+            deliveryDate: row.DeliveryDate || '-',
+            delivered: row.Delivered === true || String(row.Delivered).toUpperCase() === 'TRUE',
+            fullyPaid: row.FullyPaid === true || String(row.FullyPaid).toUpperCase() === 'TRUE',
+            deliveredAt: row.DeliveredAt || '',
+            paidAt: row.PaidAt || '',
+            onlineSubmitted: true
+          };
+        });
+      });
+  }
+
+  function getLocalHistory() {
+    let history = [];
+    try {
+      const stored = localStorage.getItem('sardar_tailoring_orders');
+      if (stored) history = JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return history;
+  }
+
+  function updateHistoryBadge() {
+    fetchOrdersFromSheet()
+      .then(function (history) {
+        document.getElementById('historyBadge').textContent = history.length;
+      })
+      .catch(function () {
+        document.getElementById('historyBadge').textContent = getLocalHistory().length;
+      });
+  }
+
+  function renderHistoryList() {
+    const listContainer = document.getElementById('historyListContainer');
+    listContainer.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--ink-muted);font-size:14px;">Loading orders from Google Sheets&hellip;</div>';
+
+    fetchOrdersFromSheet()
+      .then(function (history) {
+        renderedHistory = history;
+        renderedHistoryIsOffline = false;
+        renderHistoryCards(history, listContainer, false);
+      })
+      .catch(function (err) {
+        console.error('Could not load Google Sheets history, showing local device history instead:', err);
+        const history = getLocalHistory();
+        renderedHistory = history;
+        renderedHistoryIsOffline = true;
+        renderHistoryCards(history, listContainer, true);
+      });
+  }
+
+  function renderHistoryCards(history, listContainer, isOffline) {
+    if (history.length === 0) {
+      listContainer.innerHTML = `
+        <div class="history-empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <h3>No Orders Logged</h3>
+          <p>Once you submit order tickets, they will be saved here in history for quick reprint or review.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = isOffline ? `
+      <div style="background:var(--brand-orange);border:1px solid var(--brand-orange-border);color:var(--brand-orange-ink);border-radius:12px;padding:10px 14px;font-size:12px;margin-bottom:14px;">
+        Showing orders saved on this device only &mdash; couldn't reach Google Sheets right now.
+      </div>
+    ` : '';
+
+    history.forEach((order, index) => {
+      let itemTagsHtml = '';
+      order.itemTypes.forEach((type, idx) => {
+        itemTagsHtml += `<span class="history-card-item-tag">${type} (${order.fabricTypes[idx]})</span>`;
+      });
+
+      let notesHtml = '';
+      if (order.notesList && order.notesList.some(n => n && n !== '-')) {
+        const notesJoined = order.notesList.filter(n => n && n !== '-').join(' | ');
+        notesHtml = `<div style="font-size:12px;font-style:italic;color:var(--ink-muted);margin-top:4px;">Notes: ${notesJoined}</div>`;
+      }
+
+      const balance = order.totalPrice - order.advancePaid;
+
+      html += `
+        <div class="history-card">
+          <div class="history-card-header">
+            <div class="history-card-cust">
+              <span class="history-card-name">${order.customerName}</span>
+              <span class="history-card-phone">${order.phoneNumber}</span>
+            </div>
+            <div class="history-card-meta">
+              <span class="history-card-ticket">${order.ticketId}</span>
+              <span class="history-card-date">${order.dateSubmitted}</span>
+            </div>
+          </div>
+          
+          <div class="history-card-details">
+            ${itemTagsHtml}
+            ${notesHtml}
+          </div>
+
+          <div class="history-card-pricing">
+            <div>Total: <strong>NPR ${order.totalPrice.toLocaleString('en-IN')}</strong></div>
+            <div>Advance: <strong>NPR ${order.advancePaid.toLocaleString('en-IN')}</strong></div>
+            <div class="${balance > 0 ? 'history-card-price-value' : ''}">Due: <strong>NPR ${balance.toLocaleString('en-IN')}</strong></div>
+          </div>
+
+          <div class="history-card-status-row" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            ${order.delivered
+              ? `<span class="sheet-status synced">Delivered${order.deliveredAt ? ' &middot; ' + order.deliveredAt : ''}</span>`
+              : `<button type="button" class="history-card-btn-status" onclick="markDelivered(${index})">Mark Delivered</button>`}
+            ${order.fullyPaid
+              ? `<span class="sheet-status synced">Fully Paid${order.paidAt ? ' &middot; ' + order.paidAt : ''}</span>`
+              : `<button type="button" class="history-card-btn-status" onclick="markFullyPaid(${index})">Mark Fully Paid</button>`}
+          </div>
+
+          <div class="history-card-actions">
+            <button type="button" class="history-card-btn-view" onclick="viewHistoryTicket(${index})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              View Ticket
+            </button>
+            <button type="button" class="history-card-btn-delete" onclick="deleteHistoryTicket(${index})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    listContainer.innerHTML = html;
+  }
+
+  // Event Listeners for pieces container
+  itemsContainer.addEventListener('change', function (e) {
+    const id = e.target.dataset.id;
+    if (id !== undefined) {
+      if (e.target.classList.contains('itemTypeSelect')) {
+        renderMeasurementFields(id, e.target.value);
+      }
+      updateAccordionHeader(id);
+      recalcTotal();
+      renderReceiptPreview();
+      saveCurrentDraft();
+    }
+  });
+
+  itemsContainer.addEventListener('input', function (e) {
+    const id = e.target.dataset.id;
+    if (id !== undefined) {
+      if (e.target.classList.contains('priceInput')) {
+        recalcTotal();
+      }
+      updateAccordionHeader(id);
+      renderReceiptPreview();
+      saveCurrentDraft();
+    }
+  });
+
+  // Global Realtime Receipt Updates
+  const orderForm = document.getElementById('orderForm');
+  orderForm.addEventListener('input', function () {
+    renderReceiptPreview();
+    saveCurrentDraft();
+  });
+  orderForm.addEventListener('change', function () {
+    renderReceiptPreview();
+    saveCurrentDraft();
+  });
+
+  // Accordion Toggles
+  itemsContainer.addEventListener('click', function (e) {
+    const header = e.target.closest('.item-block-header');
+    const removeBtn = e.target.closest('.item-block-remove');
+    
+    if (removeBtn) {
+      const removeId = removeBtn.dataset.remove;
+      const block = itemsContainer.querySelector('.item-block[data-id="' + removeId + '"]');
+      if (block) {
+        block.style.opacity = '0';
+        block.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+          block.remove();
+          updateAllAccordionHeaders();
+          recalcTotal();
+          renderReceiptPreview();
+          saveCurrentDraft();
+        }, 200);
+      }
+      return;
+    }
+
+    if (header) {
+      const block = header.closest('.item-block');
+      const isExpanded = block.classList.contains('expanded');
+      
+      // Collapse other blocks
+      itemsContainer.querySelectorAll('.item-block').forEach(b => {
+        b.classList.remove('expanded');
+      });
+
+      // Toggle this block
+      if (!isExpanded) {
+        block.classList.add('expanded');
+      }
+    }
+  });
+
+  document.getElementById('addItemBtn').addEventListener('click', function () {
+    addItemBlock();
+    saveCurrentDraft();
+  });
+
+  // Form Submission Logic
+  function submitOrderData() {
+    const customerName = document.getElementById('customerName').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const advance = document.getElementById('advance').value;
+    const deliveryDateRaw = document.getElementById('deliveryDate').value;
+
+    const blocks = itemsContainer.querySelectorAll('.item-block');
+    const itemTypes = [], fabricTypes = [], colorDesigns = [], itemPrices = [], measurementsList = [], notesList = [];
+    let total = 0;
+
+    blocks.forEach(function (block) {
+      const id = block.dataset.id;
+      const itemType = block.querySelector('.itemTypeSelect').value;
+      const fabricType = block.querySelector('.fabricSelect').value;
+      const colorDesign = block.querySelector('.colorInput').value.trim();
+      const price = Number(block.querySelector('.priceInput').value) || 0;
+      itemTypes.push(itemType);
+      fabricTypes.push(fabricType || '-');
+      colorDesigns.push(colorDesign || '-');
+      itemPrices.push(price);
+      measurementsList.push(collectMeasurementsForItem(id));
+      notesList.push(collectNotesForItem(id) || '-');
+      total += price;
+    });
+
+    const parts = deliveryDateRaw.split('-');
+    const deliveryDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+    const dateToday = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const ticketId = 'ST-' + Date.now().toString().slice(-9);
+
+    const sheetPayload = {
+      customerName, phoneNumber,
+      itemTypes: itemTypes.join(', '),
+      fabricTypes: fabricTypes.join(', '),
+      colorDesigns: colorDesigns.join(', '),
+      measurements: measurementsList.join(' | '),
+      notes: notesList.join(' | '),
+      totalPrice: total,
+      advancePaid: Number(advance),
+      deliveryDate: deliveryDate
+    };
+
+    const orderLog = {
+      ticketId, dateSubmitted: dateToday, customerName, phoneNumber,
+      itemTypes, fabricTypes, colorDesigns, itemPrices, measurementsList, notesList,
+      totalPrice: total, advancePaid: Number(advance), deliveryDate,
+      onlineSubmitted: true, sheetPayload, savedAt: new Date().toISOString()
+    };
+
+    const submitBtn = document.getElementById('footerBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving to Google Sheets...';
+    clearErrors();
+
+    sendOrderToSheet(sheetPayload, ticketId)
+      .then(function () {
+        logSubmittedOrder(orderLog);
+        localStorage.removeItem('sardar_tailoring_current_draft');
+
+        document.getElementById('successCustName').textContent = customerName;
+        document.getElementById('successTotal').textContent = 'NPR ' + total.toLocaleString('en-IN');
+        document.getElementById('successBalance').textContent = 'NPR ' + (total - Number(advance)).toLocaleString('en-IN');
+        document.getElementById('successDelivery').textContent = deliveryDate;
+        document.getElementById('successQrSection').style.display = (total - Number(advance)) > 0 ? 'block' : 'none';
+        document.getElementById('successOverlay').classList.add('show');
+
+        return fetchOrdersFromSheet();
+      })
+      .then(function (history) {
+        renderedHistory = history;
+        document.getElementById('historyBadge').textContent = history.length;
+      })
+      .catch(function (err) {
+        console.error(err);
+        showGlobalError('Order was NOT saved to Google Sheets. Check your Apps Script deployment, permissions, sheet name, and internet connection. ' + err.message);
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Order';
+      });
+  }
+
+  // Handle Success Modal Closure & State Reset
+  document.getElementById('successCloseBtn').addEventListener('click', function() {
+    document.getElementById('successOverlay').classList.remove('show');
+    localStorage.removeItem('sardar_tailoring_current_draft');
+    
+    // Clear form fields
+    document.getElementById('orderForm').reset();
+    itemsContainer.innerHTML = '';
+    itemCounter = 0;
+    addItemBlock();
+    recalcTotal();
+    renderReceiptPreview();
+  });
+
+  // Intercept standard form submit and route through validation
+  document.getElementById('orderForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (validateForm()) {
+      submitOrderData();
+    }
+  });
+
+  // Initialize
+  if (!restoreCurrentDraft()) {
+    addItemBlock();
+  }
+  renderReceiptPreview();
+  updateHistoryBadge();
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(retryPendingSheetOrders, { timeout: 3000 });
+  } else {
+    setTimeout(retryPendingSheetOrders, 1500);
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function (err) {
+        console.error('Service worker registration failed:', err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
