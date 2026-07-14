@@ -1478,12 +1478,205 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
 @media(max-width:420px){.invoice-receipt{padding:14px 12px 12px}.invoice-total{font-size:17px}.invoice-total strong{font-size:18px}.invoice-table{font-size:8px}.invoice-bottom{gap:8px}.invoice-qr{width:120px}.invoice-qr img{width:100px;height:100px}}
 
 /* VISUAL ORDER VIEW ONLY */
-.order-view{background:#fff;padding:18px;color:#2c1216}.order-view-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:2px solid #1f7a4d;padding-bottom:14px;margin-bottom:14px}.order-view-title h3{margin:0 0 3px;font-size:20px}.order-view-title span{font-size:11px;color:#8a5f65}.order-view-title>b{font-size:11px;background:#dcece1;color:#14512f;padding:6px 8px;border-radius:6px}.order-view-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.order-view-grid div{background:#f7f7f7;padding:10px;border-radius:7px}.order-view-grid span{display:block;font-size:10px;color:#8a5f65;margin-bottom:3px}.order-view-grid strong{font-size:13px;word-break:break-word}.order-view-item{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px}.order-view-item-head{display:flex;justify-content:space-between;gap:10px;font-size:14px}.order-view-sub{font-size:11px;color:#666;margin-top:5px}.order-view-measures{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;background:#fdf1ef;border-radius:7px;padding:10px;margin-top:10px}.order-view-measures span{font-size:11px;word-break:break-word}.order-view-empty{font-size:11px;color:#999;font-style:italic;margin-top:9px}.order-view-notes{font-size:11px;margin-top:9px;background:#fbeecb;padding:8px;border-radius:6px}.order-view-photo{margin-top:9px}.order-view-photo img{max-width:120px;max-height:120px;border-radius:8px;border:1px solid #ddd;object-fit:cover;display:block}.order-view-money{border-top:2px solid #ddd;margin-top:16px;padding-top:10px}.order-view-money div{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.order-view-money .balance{border-top:1px solid #ddd;margin-top:4px;padding-top:10px;font-size:15px;color:#14512f}
+.order-view{background:#fff;padding:18px;color:#2c1216}.order-view-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:2px solid #1f7a4d;padding-bottom:14px;margin-bottom:14px}.order-view-title h3{margin:0 0 3px;font-size:20px}.order-view-title span{font-size:11px;color:#8a5f65}.order-view-title>b{font-size:11px;background:#dcece1;color:#14512f;padding:6px 8px;border-radius:6px}.order-view-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.order-view-grid div{background:#f7f7f7;padding:10px;border-radius:7px}.order-view-grid span{display:block;font-size:10px;color:#8a5f65;margin-bottom:3px}.order-view-grid strong{font-size:13px;word-break:break-word}.order-view-item{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px}.order-view-item-head{display:flex;justify-content:space-between;gap:10px;font-size:14px}.order-view-sub{font-size:11px;color:#666;margin-top:5px}.order-view-measures{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;background:#fdf1ef;border-radius:7px;padding:10px;margin-top:10px}.order-view-measures span{font-size:11px;word-break:break-word}.order-view-empty{font-size:11px;color:#999;font-style:italic;margin-top:9px}.order-view-notes{font-size:11px;margin-top:9px;background:#fbeecb;padding:8px;border-radius:6px}.order-view-photo{margin-top:9px}.order-view-photo img{max-width:120px;max-height:120px;border-radius:8px;border:1px solid #ddd;object-fit:cover;display:block}.order-view-money{border-top:2px solid #ddd;margin-top:16px;padding-top:10px}.order-view-money div{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.order-view-money .balance{border-top:1px solid #ddd;margin-top:4px;padding-top:10px;font-size:15px;color:#14512f}  /* ---- Loading splash screen ---- */
+  #loadingScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+  #loadingScreen .loading-mark {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #a3172f;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 34px;
+    font-weight: 700;
+    font-style: italic;
+    box-shadow: 0 10px 26px -8px rgba(163, 23, 47, 0.5);
+    animation: loadingPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes loadingPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  #loadingScreen .loading-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #3a1014;
+  }
+  #loadingScreen .loading-dots {
+    display: flex;
+    gap: 6px;
+  }
+  #loadingScreen .loading-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #a3172f;
+    opacity: 0.35;
+    animation: loadingDot 1.1s ease-in-out infinite;
+  }
+  #loadingScreen .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+  #loadingScreen .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes loadingDot {
+    0%, 80%, 100% { opacity: 0.25; }
+    40% { opacity: 1; }
+  }
+
+  /* ---- Sign-in gate ---- */
+  #signInScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+    background: #ffffff;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  #signInScreen.show { display: flex; }
+  #signInScreen .signin-mark {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #a3172f;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 30px;
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 14px;
+  }
+  #signInScreen h2 {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    color: #3a1014;
+    margin-bottom: 4px;
+  }
+  #signInScreen p {
+    font-size: 12.5px;
+    color: #8a5257;
+    margin-bottom: 22px;
+  }
+  .signin-staff-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    max-width: 340px;
+    margin-bottom: 18px;
+  }
+  .signin-staff-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1.5px solid #f0cdd2;
+    background: #fdf0ee;
+    color: #3a1014;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .signin-staff-btn.selected {
+    background: #a3172f;
+    border-color: #a3172f;
+    color: #fff;
+  }
+  #signInScreen input[type="password"] {
+    width: 220px;
+    text-align: center;
+    letter-spacing: 6px;
+    font-size: 20px;
+    height: 50px;
+  }
+  #signInScreen .signin-error {
+    color: #d81e40;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-top: 10px;
+    min-height: 16px;
+  }
+  #signInScreen .signin-submit {
+    margin-top: 16px;
+    width: 220px;
+    height: 46px;
+    border-radius: 10px;
+    background: #a3172f;
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* ---- Signed-in-as bar, shown at the top of the app ---- */
+  .signed-in-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fdf0ee;
+    border: 1px solid #f6d6d2;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #5c1524;
+  }
+  .signed-in-bar b { color: #3a1014; }
+  .signed-in-bar button {
+    background: none;
+    border: none;
+    color: #a3172f;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
 </style>
 </head>
 <body>
 
+<!-- Loading Splash Screen -->
+<div id="loadingScreen">
+  <div class="loading-mark">S</div>
+  <div class="loading-title">Sardar Tailoring</div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- Sign-In Gate -->
+<div id="signInScreen">
+  <div class="signin-mark">S</div>
+  <h2>Sign In</h2>
+  <p>Enter your name and PIN to continue</p>
+  <input type="text" id="signinName" autocomplete="off" placeholder="Your name" style="width:220px;text-align:center;height:46px;margin-bottom:10px;">
+  <input type="password" id="signinPin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="PIN">
+  <button type="button" class="signin-submit" id="signinSubmitBtn">Sign In</button>
+  <div class="signin-error" id="signinError"></div>
+</div>
+
 <main>
+
+  <!-- Signed in as -->
+  <div class="signed-in-bar" id="signedInBar" style="display:none;">
+    <span>Signed in as <b id="signedInName">-</b></span>
+    <button type="button" id="signOutBtn">Sign Out</button>
+  </div>
 
   <!-- Brand Header Card -->
   <div class="brand-card">
@@ -1776,6 +1969,102 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
   let itemCounter = 0;
   const itemsContainer = document.getElementById('itemsContainer');
   const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyoYxckT_ChPSdCSrdpL97CcMA2LkDW_PYr39eYHjy1m64Zf8FIVumOhcb1YC8LV414fQ/exec';
+
+  // ---- Staff Sign-In ----
+  // The staff roster and PINs live entirely on the server (a "Staff" tab in
+  // your Google Sheet) — this file never contains any names or PINs, so
+  // there's nothing for "View Source" to reveal. Signing in sends the name
+  // + PIN to the Apps Script backend, which checks them server-side and
+  // replies with just ok:true/false.
+  const SIGNIN_STORAGE_KEY = 'sardarSignedInStaff';
+  let currentStaffName = '';
+
+  function getSignedInStaff() {
+    try {
+      const raw = localStorage.getItem(SIGNIN_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function attemptSignIn() {
+    const errorEl = document.getElementById('signinError');
+    const submitBtn = document.getElementById('signinSubmitBtn');
+    const name = document.getElementById('signinName').value.trim();
+    const pin = document.getElementById('signinPin').value.trim();
+
+    if (!name || !pin) {
+      errorEl.textContent = 'Enter your name and PIN.';
+      return;
+    }
+
+    errorEl.textContent = '';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in...';
+
+    fetch(GOOGLE_SHEETS_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'login', name: name, pin: pin })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (result) {
+        if (result && result.ok) {
+          localStorage.setItem(SIGNIN_STORAGE_KEY, JSON.stringify({ name: result.name, at: new Date().toISOString() }));
+          enterAppAsStaff(result.name);
+        } else {
+          errorEl.textContent = (result && result.error) || 'Sign-in failed. Try again.';
+          document.getElementById('signinPin').value = '';
+        }
+      })
+      .catch(function () {
+        errorEl.textContent = 'Could not reach the server. Check your internet connection.';
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+      });
+  }
+
+  function enterAppAsStaff(name) {
+    currentStaffName = name;
+    document.getElementById('signedInName').textContent = name;
+    document.getElementById('signedInBar').style.display = 'flex';
+    document.getElementById('signInScreen').classList.remove('show');
+  }
+
+  function signOutStaff() {
+    localStorage.removeItem(SIGNIN_STORAGE_KEY);
+    currentStaffName = '';
+    document.getElementById('signinName').value = '';
+    document.getElementById('signinPin').value = '';
+    document.getElementById('signinError').textContent = '';
+    document.getElementById('signedInBar').style.display = 'none';
+    document.getElementById('signInScreen').classList.add('show');
+  }
+
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    if (confirm('Sign out?')) signOutStaff();
+  });
+  document.getElementById('signinSubmitBtn').addEventListener('click', attemptSignIn);
+  document.getElementById('signinPin').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') attemptSignIn();
+  });
+  document.getElementById('signinName').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('signinPin').focus();
+  });
+
+  function initSignIn() {
+    const existing = getSignedInStaff();
+    if (existing && existing.name) {
+      enterAppAsStaff(existing.name);
+    } else {
+      document.getElementById('signInScreen').classList.add('show');
+    }
+  }
+
+  function hideLoadingScreen() {
+    const el = document.getElementById('loadingScreen');
+    if (el) el.style.display = 'none';
+  }
 
   // Edit-mode state: when set, the New Order form is pre-filled with an existing
   // order and submitting will update that order instead of creating a new one.
@@ -2795,7 +3084,10 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
       const photoHtml = (photo && photo !== '-') ? `<div class="order-view-photo"><a href="${esc(photo)}" target="_blank" rel="noopener"><img src="${esc(photo)}" alt="Reference photo" loading="lazy"></a></div>` : '';
       itemsHtml += `<div class="order-view-item"><div class="order-view-item-head"><strong>${i+1}. ${esc(order.itemTypes[i] || 'Unselected')}</strong><b>NPR ${Number(order.itemPrices?.[i] || 0).toLocaleString('en-IN')}</b></div><div class="order-view-sub">Fabric: ${esc(order.fabricTypes?.[i] || '-')} &nbsp;•&nbsp; Color/Design: ${esc(order.colorDesigns?.[i] || '-')}</div>${photoHtml}${measurementHtml ? `<div class="order-view-measures">${measurementHtml}</div>` : '<div class="order-view-empty">No measurements entered</div>'}${notes ? `<div class="order-view-notes"><b>Notes:</b> ${esc(notes)}</div>` : ''}</div>`;
     }
-    return `<div class="order-view"><div class="order-view-title"><div><h3>ORDER VIEW</h3><span>Complete order details & measurements</span></div><b>${esc(order.ticketId)}</b></div><div class="order-view-grid"><div><span>Customer</span><strong>${esc(order.customerName)}</strong></div><div><span>Phone</span><strong>${esc(order.phoneNumber)}</strong></div><div><span>Order Date</span><strong>${esc(order.dateSubmitted)}</strong></div><div><span>Delivery Date</span><strong>${esc(order.deliveryDate)}</strong></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;">${isDelivered ? '<span class="sheet-status synced">Delivered</span>' : ''}${isFullyPaid ? '<span class="sheet-status synced">Fully Paid</span>' : ''}</div><div class="order-view-items">${itemsHtml}</div><div class="order-view-money"><div><span>Total Amount</span><b>NPR ${total.toLocaleString('en-IN')}</b></div><div><span>Advance Paid</span><b>NPR ${advance.toLocaleString('en-IN')}</b></div><div class="balance"><span>Balance Remaining</span><b>NPR ${balance.toLocaleString('en-IN')}</b></div></div></div>`;
+    const staffLine = (order.lastEditedBy && order.lastEditedBy !== order.createdBy)
+      ? `Created by ${esc(order.createdBy || '-')} &nbsp;•&nbsp; Last edited by ${esc(order.lastEditedBy)}`
+      : (order.createdBy ? `Created by ${esc(order.createdBy)}` : '');
+    return `<div class="order-view"><div class="order-view-title"><div><h3>ORDER VIEW</h3><span>Complete order details & measurements</span></div><b>${esc(order.ticketId)}</b></div><div class="order-view-grid"><div><span>Customer</span><strong>${esc(order.customerName)}</strong></div><div><span>Phone</span><strong>${esc(order.phoneNumber)}</strong></div><div><span>Order Date</span><strong>${esc(order.dateSubmitted)}</strong></div><div><span>Delivery Date</span><strong>${esc(order.deliveryDate)}</strong></div></div>${staffLine ? `<div style="font-size:11.5px;color:#8a5257;margin:-8px 0 14px;">${staffLine}</div>` : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;">${isDelivered ? '<span class="sheet-status synced">Delivered</span>' : ''}${isFullyPaid ? '<span class="sheet-status synced">Fully Paid</span>' : ''}</div><div class="order-view-items">${itemsHtml}</div><div class="order-view-money"><div><span>Total Amount</span><b>NPR ${total.toLocaleString('en-IN')}</b></div><div><span>Advance Paid</span><b>NPR ${advance.toLocaleString('en-IN')}</b></div><div class="balance"><span>Balance Remaining</span><b>NPR ${balance.toLocaleString('en-IN')}</b></div></div></div>`;
   }
 
   // Live Ticket Receipt Preview
@@ -3161,16 +3453,12 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
             itemTypes: String(row.ItemTypes || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
             fabricTypes: String(row.FabricTypes || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
             colorDesigns: String(row.ColorDesigns || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+            itemPrices: String(row.ItemPrices || '').split(',').map(function (s) { return Number(s.trim()) || 0; }),
+            createdBy: String(row.CreatedBy || '').trim(),
+            lastEditedBy: String(row.LastEditedBy || '').trim(),
             measurementsList: String(row.Measurements || '').split('|').map(function (s) { return s.trim(); }),
             notesList: String(row.Notes || '').split('|').map(function (s) { return s.trim(); }),
-            itemPrices: Array.isArray(row.ItemPricesArray)
-              ? row.ItemPricesArray.map(function (p) { return Number(p) || 0; })
-              : String(row.ItemPrices || '').split('|').map(function (p) {
-                  return Number(String(p).trim().replace(/[^\d.-]/g, '')) || 0;
-                }),
-            referencePhotosList: Array.isArray(row.ReferencePhotosArray)
-              ? row.ReferencePhotosArray.map(function (s) { return String(s || '').trim(); })
-              : String(row.ReferencePhotos || '').split('|').map(function (s) { return String(s || '').trim(); }),
+            referencePhotosList: String(row.ReferencePhotos || '').split('|').map(function (s) { return s.trim(); }),
             totalPrice: total,
             advancePaid: advancePaid,
             deliveryDate: row.DeliveryDate || '-',
@@ -3449,7 +3737,7 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
       itemTypes: itemTypes.join(', '),
       fabricTypes: fabricTypes.join(', '),
       colorDesigns: colorDesigns.join(', '),
-      itemPrices: itemPrices.join(' | '),
+      itemPrices: itemPrices.join(', '),
       measurements: measurementsList.join(' | '),
       notes: notesList.join(' | '),
       totalPrice: total,
@@ -3457,6 +3745,7 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
       deliveryDate: deliveryDate,
       fullyPaid: preservedFullyPaid,
       delivered: preservedDelivered,
+      staffName: currentStaffName || '',
       // Each entry is either a data: URL (a photo just picked on this device,
       // needs uploading) or an existing https:// URL (already uploaded, kept
       // as-is), or '' (no photo). The Apps Script backend uploads any data:
@@ -3569,6 +3858,8 @@ input,select{height:48px;border-radius:7px;padding:13px 14px;}
   }
   renderReceiptPreview();
   updateHistoryBadge();
+  initSignIn();
+  hideLoadingScreen();
   if ('requestIdleCallback' in window) {
     requestIdleCallback(retryPendingSheetOrders, { timeout: 3000 });
   } else {
