@@ -4266,12 +4266,12 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
   }
 
   const measurementFields = {
-    'Pant': ['Waist', 'Hip', 'Length', 'Thigh', 'Mori', 'Lataak'],
-    'Shirt': ['Chest', 'Shoulder', 'Sleeve Length', 'Length', 'Collar', 'Cuff', 'Pet'],
-    'Coat': ['Chest', 'Shoulder', 'Sleeve Length', 'Length', 'Waist'],
-    'Blazer': ['Chest', 'Shoulder', 'Sleeve Length', 'Length', 'Waist'],
+    'Pant': ['Length', 'Waist', 'Hip', 'Thigh', 'Mori', 'Lataak'],
+    'Shirt': ['Length', 'Chest', 'Pet', 'Shoulder', 'Sleeve Length', 'Collar', 'Cuff'],
+    'Coat': ['Length', 'Chest', 'Shoulder', 'Sleeve Length', 'Waist'],
+    'Blazer': ['Length', 'Chest', 'Shoulder', 'Sleeve Length', 'Waist'],
     'Safari Suit': ['Chest', 'Shoulder', 'Sleeve Length', 'Coat Length', 'Waist', 'Hip', 'Pant Length'],
-    'Kurta': ['Chest', 'Shoulder', 'Length', 'Sleeve Length', 'Collar', 'Cuff', 'Pet'],
+    'Kurta': ['Length', 'Chest', 'Pet', 'Shoulder', 'Sleeve Length', 'Collar', 'Cuff'],
     'Other': []
   };
 
@@ -6318,15 +6318,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     });
   }
 
-  function offerFullyPaidWhatsAppConfirmation(order) {
-    if (!formatPhoneForWhatsApp(order.phoneNumber)) return;
-    appConfirm('Send a WhatsApp message to the customer confirming full payment?').then(function (yes) {
-      if (!yes) return;
-      const updated = Object.assign({}, order, { fullyPaid: true, paidAt: order.paidAt || todayFormatted() });
-      sendStatusConfirmationWhatsApp(updated, 'fullyPaid');
-    });
-  }
-
   window.markFullyPaid = function(index) {
     const order = renderedHistory[index];
     if (!order) return;
@@ -6337,21 +6328,18 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       if (renderedHistoryIsOffline) {
         updateLocalOrderStatus(order.ticketId, { fullyPaid: true, paidAt: todayFormatted() });
         renderHistoryList();
-        offerFullyPaidWhatsAppConfirmation(order);
         return;
       }
 
       updateOrderStatus(order.ticketId, { fullyPaid: true })
         .then(function () {
           renderHistoryList();
-          offerFullyPaidWhatsAppConfirmation(order);
         })
         .catch(function (err) {
           console.error(err);
           updateLocalOrderStatus(order.ticketId, { fullyPaid: true, paidAt: todayFormatted() });
           appAlert('Could not reach Google Sheets, so this was saved on this device only. It will need to be re-synced once you\'re back online.');
           renderHistoryList();
-          offerFullyPaidWhatsAppConfirmation(order);
         });
     });
   }
