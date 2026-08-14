@@ -3884,6 +3884,11 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
         </div>
 
         <div class="input-group">
+          <label for="totalPrice">Total Price (NPR)</label>
+          <input type="number" id="totalPrice" required min="0" placeholder="e.g. 5000" inputmode="numeric">
+        </div>
+
+        <div class="input-group">
           <label for="advance">Advance Paid (NPR)</label>
           <input type="number" id="advance" required min="0" value="0" placeholder="0">
         </div>
@@ -4887,11 +4892,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
         <div class="input-group">
           <label>Color / Design</label>
           <input type="text" class="colorInput" data-field="colorDesign" data-id="${id}" placeholder="e.g. Navy Pinstripe">
-        </div>
-
-        <div class="input-group">
-          <label>Price (NPR)</label>
-          <input type="number" class="priceInput" data-field="price" data-id="${id}" placeholder="e.g. 1500" min="0" inputmode="numeric">
         </div>
 
         <div class="measureContainer" data-id="${id}">
