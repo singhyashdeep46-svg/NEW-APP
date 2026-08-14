@@ -4846,7 +4846,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
           </div>
         </div>
         <div class="item-block-header-right">
-          <span class="item-block-price">--</span>
           ${!isFirst ? `
             <button type="button" class="item-block-remove" data-remove="${id}">
               <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007zm-10 4a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1m4 0a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1" /><path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005z" /></svg>
@@ -4893,11 +4892,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
         <div class="measureContainer" data-id="${id}">
           <label>Measurements</label>
           <div class="hint">Select an item type above to see matching measurement fields</div>
-        </div>
-
-        <div class="input-group">
-          <label>Item Price (NPR)</label>
-          <input type="number" class="priceInput" data-field="price" data-id="${id}" min="0" required placeholder="0">
         </div>
 
         <div class="input-group">
@@ -4982,11 +4976,9 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     const typeSelect = block.querySelector('.itemTypeSelect');
     const fabricSelect = block.querySelector('.fabricSelect');
     const colorInput = block.querySelector('.colorInput');
-    const priceInput = block.querySelector('.priceInput');
 
     const titleEl = block.querySelector('.item-block-summary-title');
     const descEl = block.querySelector('.item-block-summary-desc');
-    const priceEl = block.querySelector('.item-block-price');
 
     const typeText = typeSelect.value || 'New Clothing Piece';
     const fabricText = fabricSelect.value || '';
@@ -4998,9 +4990,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     if (fabricText) desc.push(fabricText);
     if (colorText) desc.push(colorText);
     descEl.textContent = desc.join(', ') || 'Select item details...';
-
-    const priceVal = Number(priceInput.value) || 0;
-    priceEl.textContent = priceVal > 0 ? 'NPR ' + priceVal.toLocaleString('en-IN') : '--';
   }
 
   function updateAllAccordionHeaders() {
@@ -5014,13 +5003,7 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
   }
 
   function recalcTotal() {
-    const priceInputs = itemsContainer.querySelectorAll('.priceInput');
-    let total = 0;
-    priceInputs.forEach(function (input) {
-      total += Number(input.value) || 0;
-    });
-    
-    document.getElementById('totalPrice').value = total;
+    const total = Number(document.getElementById('totalPrice').value) || 0;
     const formatted = 'NPR ' + total.toLocaleString('en-IN');
     document.getElementById('footerTotal').textContent = formatted;
   }
