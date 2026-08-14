@@ -5792,47 +5792,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     return lines.join('\n');
   }
 
-  // Short, standalone confirmation sent right after staff taps "Mark
-  // Delivered" or "Mark Fully Paid" — separate from the full itemized
-  // receipt so the customer gets a quick, unambiguous confirmation instead
-  // of the whole ticket again.
-  function buildStatusConfirmationMessage(order, kind) {
-    const total = Number(order.totalPrice) || 0;
-    const advance = Number(order.advancePaid) || 0;
-    const balance = Math.max(0, total - advance);
-    const isFullyPaid = kind === 'fullyPaid' || order.fullyPaid === true || (total > 0 && advance >= total);
-    const isDelivered = kind === 'delivered' || order.delivered === true;
-
-    const lines = [];
-    lines.push('Hi ' + (order.customerName || 'there') + ', this is *Sardar Tailoring*.');
-    lines.push('');
-    lines.push('Ticket: *' + order.ticketId + '*');
-
-    if (kind === 'delivered') {
-      lines.push('✅ Your order has been *delivered*.');
-      if (!isFullyPaid) lines.push('Balance Due: *NPR ' + balance.toLocaleString('en-IN') + '*');
-    } else if (kind === 'fullyPaid') {
-      lines.push('✅ Payment has been *received in full*.');
-      if (!isDelivered) lines.push('We\'ll notify you once your order is ready for delivery.');
-    }
-
-    if (isDelivered && isFullyPaid) {
-      lines.push('');
-      lines.push('Your order is delivered and fully paid — all done!');
-    }
-
-    lines.push('');
-    lines.push('Thank you for choosing us! 🙏');
-    return lines.join('\n');
-  }
-
-  function sendStatusConfirmationWhatsApp(order, kind) {
-    const phone = formatPhoneForWhatsApp(order.phoneNumber);
-    if (!phone) return;
-    const message = buildStatusConfirmationMessage(order, kind);
-    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(message), '_blank');
-  }
-
   // WhatsApp silently drops an attached image if the caption text is too
   // long (roughly a thousand characters, though the exact cutoff varies by
   // version) — it just falls back to sending the text alone. The full
@@ -6285,14 +6244,12 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       if (renderedHistoryIsOffline) {
         updateLocalOrderStatus(order.ticketId, { delivered: true, deliveredAt: todayFormatted() });
         renderHistoryList();
-        offerDeliveredWhatsAppConfirmation(order);
         return;
       }
 
       updateOrderStatus(order.ticketId, { delivered: true })
         .then(function () {
           renderHistoryList();
-          offerDeliveredWhatsAppConfirmation(order);
         })
         .catch(function (err) {
           console.error(err);
@@ -6301,20 +6258,7 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
           updateLocalOrderStatus(order.ticketId, { delivered: true, deliveredAt: todayFormatted() });
           appAlert('Could not reach Google Sheets, so this was saved on this device only. It will need to be re-synced once you\'re back online.');
           renderHistoryList();
-          offerDeliveredWhatsAppConfirmation(order);
         });
-    });
-  }
-
-  // After a status change succeeds, offer to notify the customer over
-  // WhatsApp right away rather than making staff hunt for the "Send
-  // Receipt" button separately.
-  function offerDeliveredWhatsAppConfirmation(order) {
-    if (!formatPhoneForWhatsApp(order.phoneNumber)) return;
-    appConfirm('Send a WhatsApp message to the customer confirming delivery?').then(function (yes) {
-      if (!yes) return;
-      const updated = Object.assign({}, order, { delivered: true, deliveredAt: order.deliveredAt || todayFormatted() });
-      sendStatusConfirmationWhatsApp(updated, 'delivered');
     });
   }
 
