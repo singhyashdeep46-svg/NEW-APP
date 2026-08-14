@@ -4755,23 +4755,16 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       isValid = false;
     } else {
       blocks.forEach(block => {
-        const id = block.dataset.id;
         const typeSelect = block.querySelector('.itemTypeSelect');
-        const priceInput = block.querySelector('.priceInput');
 
         if (!typeSelect.value) {
           typeSelect.classList.add('input-error');
           isValid = false;
         }
-
-        if (!priceInput.value || Number(priceInput.value) <= 0) {
-          priceInput.classList.add('input-error');
-          isValid = false;
-        }
       });
 
       if (!isValid) {
-        showGlobalError('Please specify Item Type and Price for all clothing pieces.');
+        showGlobalError('Please specify Item Type for all clothing pieces.');
       }
     }
 
@@ -4892,11 +4885,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
         <div class="input-group">
           <label>Color / Design</label>
           <input type="text" class="colorInput" data-field="colorDesign" data-id="${id}" placeholder="e.g. Navy Pinstripe">
-        </div>
-
-        <div class="input-group">
-          <label>Price (NPR)</label>
-          <input type="number" class="priceInput" data-field="price" data-id="${id}" min="0" step="1" placeholder="e.g. 1500">
         </div>
 
         <div class="measureContainer" data-id="${id}">
@@ -5285,7 +5273,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
         itemType: block.querySelector('.itemTypeSelect').value,
         fabricType: block.querySelector('.fabricSelect').value,
         colorDesign: block.querySelector('.colorInput').value.trim(),
-        price: block.querySelector('.priceInput').value,
         measurements: collectMeasurementValuesForItem(id)
       });
     });
@@ -5295,6 +5282,7 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       customerName: document.getElementById('customerName').value.trim(),
       phoneNumber: document.getElementById('phoneNumber').value.trim(),
       advance: document.getElementById('advance').value,
+      totalPrice: document.getElementById('totalPrice').value,
       deliveryDate: getFieldISO('deliveryDate'),
       pieces: pieces
     };
@@ -5317,13 +5305,14 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
 
     if (!draft || !draft.pieces || draft.pieces.length === 0) return false;
     const hasSavedWork = draft.customerName || draft.phoneNumber || draft.deliveryDate || draft.pieces.some(function (piece) {
-      return piece.itemType || piece.fabricType || piece.colorDesign || piece.price || piece.measurements.freeText || Object.keys(piece.measurements.fields || {}).length > 0;
+      return piece.itemType || piece.fabricType || piece.colorDesign || piece.measurements.freeText || Object.keys(piece.measurements.fields || {}).length > 0;
     });
     if (!hasSavedWork) return false;
 
     document.getElementById('customerName').value = draft.customerName || '';
     document.getElementById('phoneNumber').value = draft.phoneNumber || '';
     document.getElementById('advance').value = draft.advance || '0';
+    document.getElementById('totalPrice').value = draft.totalPrice || '';
     setFieldISO('deliveryDate', draft.deliveryDate || '');
 
     itemsContainer.innerHTML = '';
@@ -5335,7 +5324,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       block.querySelector('.itemTypeSelect').value = piece.itemType || '';
       block.querySelector('.fabricSelect').value = piece.fabricType || '';
       block.querySelector('.colorInput').value = piece.colorDesign || '';
-      block.querySelector('.priceInput').value = piece.price || '';
       renderMeasurementFields(id, piece.itemType || '');
       updateItemBlockColor(block);
 
@@ -5563,13 +5551,12 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       const b = blocks[i];
       const fabric = b.querySelector('.fabricSelect').value;
       const color = b.querySelector('.colorInput').value;
-      const price = b.querySelector('.priceInput').value;
       // Item Type alone (picked but nothing else touched yet) still counts as
       // an unused piece — reuse it instead of spawning a duplicate block.
       // Without this, picking "Item Type" before tapping "+ Add to Bill" from
       // Recurring Customer left that half-started piece behind AND added the
       // pulled-in piece as a second block.
-      if (!fabric && !color && !price) return b;
+      if (!fabric && !color) return b;
     }
     return null;
   }
@@ -5636,6 +5623,7 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     document.getElementById('customerName').value = order.customerName || '';
     document.getElementById('phoneNumber').value = order.phoneNumber || '';
     document.getElementById('advance').value = (order.advancePaid != null) ? order.advancePaid : 0;
+    document.getElementById('totalPrice').value = (order.totalPrice != null) ? order.totalPrice : '';
     setFieldISO('deliveryDate', displayDateToInputDate(order.deliveryDate));
 
     itemsContainer.innerHTML = '';
@@ -5649,7 +5637,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       block.querySelector('.itemTypeSelect').value = itemType || '';
       block.querySelector('.fabricSelect').value = cleanVal(order.fabricTypes && order.fabricTypes[i]);
       block.querySelector('.colorInput').value = cleanVal(order.colorDesigns && order.colorDesigns[i]);
-      block.querySelector('.priceInput').value = (order.itemPrices && order.itemPrices[i]) || '';
       renderMeasurementFields(id, itemType || '');
       updateItemBlockColor(block);
 
@@ -5735,13 +5722,12 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       }
       if (measurements && measurements.fields) measurements = measurements.fields;
 
-      const price = Number(order.itemPrices && order.itemPrices[i]) || 0;
       const fabric = (order.fabricTypes && order.fabricTypes[i]) || '-';
       const color = (order.colorDesigns && order.colorDesigns[i]) || '-';
       const notes = (order.notesList && order.notesList[i]) || '';
       const photo = (order.referencePhotosList && order.referencePhotosList[i]) || '';
 
-      lines.push((i + 1) + '. *' + (itemType || 'Unselected') + '* — NPR ' + price.toLocaleString('en-IN'));
+      lines.push((i + 1) + '. *' + (itemType || 'Unselected') + '*');
       lines.push('   Fabric: ' + fabric + '  |  Color/Design: ' + color);
 
       const measureEntries = Object.entries(measurements || {}).filter(function (pair) {
@@ -5943,7 +5929,7 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       const photo = order.referencePhotosList?.[i] || '';
       const measurementHtml = Object.entries(measurements).filter(([,v]) => v !== '' && v != null).map(([k,v]) => `<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('');
       const photoHtml = (photo && photo !== '-') ? `<div class="order-view-photo"><a href="${esc(photo)}" target="_blank" rel="noopener"><img src="${esc(photo)}" alt="Reference photo" loading="lazy"></a></div>` : '';
-      itemsHtml += `<div class="order-view-item"><div class="order-view-item-head"><strong>${i+1}. ${esc(order.itemTypes[i] || 'Unselected')}</strong><b>NPR ${Number(order.itemPrices?.[i] || 0).toLocaleString('en-IN')}</b></div><div class="order-view-sub">Fabric: ${esc(order.fabricTypes?.[i] || '-')} &nbsp;•&nbsp; Color/Design: ${esc(order.colorDesigns?.[i] || '-')}</div>${photoHtml}${measurementHtml ? `<div class="order-view-measures">${measurementHtml}</div>` : '<div class="order-view-empty">No measurements entered</div>'}${notes ? `<div class="order-view-notes"><b>Notes:</b> ${esc(notes)}</div>` : ''}</div>`;
+      itemsHtml += `<div class="order-view-item"><div class="order-view-item-head"><strong>${i+1}. ${esc(order.itemTypes[i] || 'Unselected')}</strong></div><div class="order-view-sub">Fabric: ${esc(order.fabricTypes?.[i] || '-')} &nbsp;•&nbsp; Color/Design: ${esc(order.colorDesigns?.[i] || '-')}</div>${photoHtml}${measurementHtml ? `<div class="order-view-measures">${measurementHtml}</div>` : '<div class="order-view-empty">No measurements entered</div>'}${notes ? `<div class="order-view-notes"><b>Notes:</b> ${esc(notes)}</div>` : ''}</div>`;
     }
     const staffLine = (order.lastEditedBy && order.lastEditedBy !== order.createdBy)
       ? `Created by ${esc(order.createdBy || '-')} &nbsp;•&nbsp; Last edited by ${esc(order.lastEditedBy)}`
@@ -5971,29 +5957,25 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     const itemTypes = [];
     const fabricTypes = [];
     const colorDesigns = [];
-    const itemPrices = [];
     const measurementsList = [];
     const notesList = [];
     const referencePhotosList = [];
-    let total = 0;
+    const total = Number(document.getElementById('totalPrice').value) || 0;
 
     blocks.forEach(block => {
       const id = block.dataset.id;
       const itemType = block.querySelector('.itemTypeSelect').value || 'Unselected';
       const fabricType = block.querySelector('.fabricSelect').value || '-';
       const colorDesign = block.querySelector('.colorInput').value.trim() || '-';
-      const price = Number(block.querySelector('.priceInput').value) || 0;
       const measurements = collectMeasurementsForItem(id);
       const notes = collectNotesForItem(id);
 
       itemTypes.push(itemType);
       fabricTypes.push(fabricType);
       colorDesigns.push(colorDesign);
-      itemPrices.push(price);
       measurementsList.push(measurements);
       notesList.push(notes);
       referencePhotosList.push(collectPhotoForItem(id));
-      total += price;
     });
 
     return {
@@ -6006,7 +5988,6 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
         itemTypes: itemTypes,
         fabricTypes: fabricTypes,
         colorDesigns: colorDesigns,
-        itemPrices: itemPrices,
         measurementsList: measurementsList,
         notesList: notesList,
         referencePhotosList: referencePhotosList,
@@ -7260,23 +7241,20 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
     const deliveryDateRaw = getFieldISO('deliveryDate');
 
     const blocks = itemsContainer.querySelectorAll('.item-block');
-    const itemTypes = [], fabricTypes = [], colorDesigns = [], itemPrices = [], measurementsList = [], notesList = [], referencePhotosList = [];
-    let total = 0;
+    const itemTypes = [], fabricTypes = [], colorDesigns = [], measurementsList = [], notesList = [], referencePhotosList = [];
+    const total = Number(document.getElementById('totalPrice').value) || 0;
 
     blocks.forEach(function (block) {
       const id = block.dataset.id;
       const itemType = block.querySelector('.itemTypeSelect').value;
       const fabricType = block.querySelector('.fabricSelect').value;
       const colorDesign = block.querySelector('.colorInput').value.trim();
-      const price = Number(block.querySelector('.priceInput').value) || 0;
       itemTypes.push(itemType);
       fabricTypes.push(fabricType || '-');
       colorDesigns.push(colorDesign || '-');
-      itemPrices.push(price);
       measurementsList.push(collectMeasurementsForItem(id));
       notesList.push(collectNotesForItem(id) || '-');
       referencePhotosList.push(collectPhotoForItem(id));
-      total += price;
     });
 
     const parts = deliveryDateRaw.split('-');
