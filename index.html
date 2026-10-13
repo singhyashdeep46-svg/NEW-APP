@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#c23a2a" id="themeColorMeta">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <script>
   // Apply saved page size + dark mode immediately, before first paint,
   // so there's no flash of the wrong size/theme on load.
@@ -2049,7 +2050,7 @@ main{padding-bottom:150px;}
 .history-badge{background:var(--brand-green);}
 
 .tab-panel-enter{
-  animation: section-fade-in 0.2s ease both;
+  animation: section-fade-in 0.2s ease backwards;
 }
 @media (prefers-reduced-motion: reduce){
   .tab-btn, .tab-panel-enter{ animation:none !important; transition:none !important; }
@@ -3758,6 +3759,64 @@ html.dark-mode .picker-sheet-option:hover{ background: rgba(255,255,255,.06) !im
 html.dark-mode .calendar-day-btn{ color: #eef0f3 !important; }
 html.dark-mode .calendar-day-btn:hover:not(:disabled){ background: rgba(255,255,255,.08) !important; }
 html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.1) !important; }
+
+/* ================= Apple-style design layer ================= */
+:root{
+  --ap-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,system-ui,"Segoe UI",Roboto,sans-serif;
+  --ap-bg:#f5f5f7; --ap-surface:#fff; --ap-ink:#1d1d1f; --ap-muted:#6e6e73;
+  --ap-line:rgba(60,60,67,.14); --ap-radius:20px;
+  --ap-mat:rgba(255,255,255,.72); --ap-edge:rgba(255,255,255,.7);
+  --ap-blur:blur(24px) saturate(180%);
+  --ap-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px -12px rgba(0,0,0,.16);
+  --ap-spring:cubic-bezier(.2,.9,.25,1);
+  --bar-bottom:16px; --bar-h:76px;
+}
+html.dark-mode{
+  --ap-bg:#15191d; --ap-surface:#1b1e24; --ap-ink:#f5f5f7; --ap-muted:#98989f;
+  --ap-line:rgba(255,255,255,.12); --ap-mat:rgba(34,37,43,.72); --ap-edge:rgba(255,255,255,.12);
+  --ap-shadow:0 10px 30px -12px rgba(0,0,0,.6);
+}
+@media (prefers-reduced-transparency:reduce){
+  :root{--ap-mat:var(--ap-surface);--ap-blur:none}
+  html.dark-mode{--ap-mat:var(--ap-surface);--ap-blur:none}
+}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--ap-font)!important;-webkit-font-smoothing:antialiased}
+h1,h2,h3{letter-spacing:-.022em;line-height:1.15}
+button,a,label,select,.tab-btn{touch-action:manipulation}
+
+/* Cards: soft depth instead of hard borders */
+.card,.history-card,.receipt-ticket,.item-block{
+  border:0!important;border-radius:var(--ap-radius)!important;box-shadow:var(--ap-shadow)!important}
+input,select,textarea{border-radius:12px!important}
+input:focus,select:focus,textarea:focus{outline:none!important;
+  box-shadow:0 0 0 4px rgba(31,143,95,.22)!important}
+
+/* Instant press feedback (on pointer-down, not release) */
+button{transition:transform .12s var(--ap-spring),filter .12s ease}
+button:not(.tab-btn):active{transform:scale(.97)}
+
+/* Floating total bar: translucent material, never transformed */
+.summary-bar,html.dark-mode .summary-bar{
+  background:var(--ap-mat)!important;
+  -webkit-backdrop-filter:var(--ap-blur)!important;backdrop-filter:var(--ap-blur)!important;
+  border:1px solid var(--ap-edge)!important;border-radius:22px!important;
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.28)!important;
+  transform:none!important;z-index:60;
+  transition:opacity .2s ease,visibility .2s}
+.summary-bar .total-tag .value{font-size:22px!important;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+#footerBtn{border-radius:16px!important}
+html.kb-open .summary-bar{opacity:0;visibility:hidden;pointer-events:none}
+@media (max-width:879px){
+  .summary-bar{left:12px!important;right:12px!important;bottom:var(--bar-bottom)!important;
+    max-width:520px!important;margin:0 auto!important}
+  .tab-switcher{background:var(--ap-mat)!important;
+    -webkit-backdrop-filter:var(--ap-blur)!important;backdrop-filter:var(--ap-blur)!important}
+}
+/* content clearance computed from the real bar + nav, not magic numbers */
+main{padding-bottom:calc(var(--bar-h) + var(--bar-bottom) + 24px)!important}
+@media (prefers-contrast:more){.summary-bar{border-color:var(--ap-ink)!important}}
+@media (prefers-reduced-motion:reduce){button{transition:none}button:not(.tab-btn):active{transform:none}}
 </style>
 
 </head>
@@ -3926,14 +3985,7 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
       <!-- Error message alert panel -->
       <div class="error" id="errorMsg">Please correct invalid fields before submitting.</div>
 
-      <!-- Sticky Floating Action Footer bar -->
-      <div class="summary-bar">
-        <div class="total-tag">
-          <span class="label">Total</span>
-          <span class="value" id="footerTotal">NPR 0</span>
-        </div>
-        <button type="submit" id="footerBtn">Submit Order</button>
-      </div>
+      
 
     </form>
   </div>
@@ -4035,6 +4087,15 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
   </div>
 
 </main>
+
+  <!-- Sticky Floating Action Footer bar -->
+      <div class="summary-bar">
+        <div class="total-tag">
+          <span class="label">Total</span>
+          <span class="value" id="footerTotal">NPR 0</span>
+        </div>
+        <button type="submit" id="footerBtn" form="orderForm">Submit Order</button>
+      </div>
 
 <!-- Ticket Receipt Modal popup -->
 <div class="modal-overlay" id="receiptModal">
@@ -7424,5 +7485,42 @@ html.dark-mode .calendar-nav-btn{ background: rgba(255,255,255,.06) !important; 
 </script>
 
 
+
+<script>
+(function(){
+  var root=document.documentElement, nav=document.getElementById('tabSwitcher'),
+      bar=document.querySelector('.summary-bar'),
+      mq=window.matchMedia('(max-width: 879px)'), maxH=0;
+  function layout(){
+    if(!bar) return;
+    if(!mq.matches){ root.style.setProperty('--bar-bottom','16px'); }
+    else if(nav && nav.offsetHeight>0 && bar.offsetHeight>0){
+      // calibrate rect-units per CSS px so it stays correct under the page-zoom setting
+      root.style.setProperty('--bar-bottom','0px');
+      var r0=bar.getBoundingClientRect().bottom;
+      root.style.setProperty('--bar-bottom','100px');
+      var f=(r0-bar.getBoundingClientRect().bottom)/100||1;
+      var rise=r0-nav.getBoundingClientRect().top;
+      root.style.setProperty('--bar-bottom',Math.max(0,Math.round(rise/f))+12+'px');
+    } else if(!bar.offsetHeight===false || mq.matches){ /* bar hidden: keep last value */ }
+    if(bar.offsetHeight>0) root.style.setProperty('--bar-h',bar.offsetHeight+'px');
+  }
+  function kb(){
+    var h=(window.visualViewport?window.visualViewport.height:window.innerHeight);
+    maxH=Math.max(maxH,h);
+    root.classList.toggle('kb-open',h<maxH*0.78);
+  }
+  var sw=window.switchTab;
+  if(typeof sw==='function'){
+    window.switchTab=function(){var r=sw.apply(this,arguments);requestAnimationFrame(layout);return r;};
+  }
+  if(window.ResizeObserver){var ro=new ResizeObserver(layout);if(nav)ro.observe(nav);if(bar)ro.observe(bar);}
+  window.addEventListener('resize',function(){layout();kb();});
+  window.addEventListener('orientationchange',function(){maxH=0;setTimeout(function(){layout();kb();},300);});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',kb);
+  window.addEventListener('load',layout);
+  layout();kb();
+})();
+</script>
 </body>
 </html>
