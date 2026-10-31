@@ -1313,6 +1313,187 @@ html.dark-mode .picker-sheet-option.selected { color: var(--accent-strong); }
 @media (prefers-reduced-motion: no-preference) {
   .history-card { animation-duration: 0.28s; animation-timing-function: var(--ease-out); }
 }
+
+/* =====================================================================
+   PREMIUM GLASS LAYER
+   Glass only reads as glass when there is something to refract, so this
+   layer adds (1) a quiet ambient light field behind the app, (2) frosted,
+   edge-lit surfaces, (3) restraint: blur only where content scrolls
+   beneath (tab bar, summary bar, sheets). List cards are translucent but
+   unblurred, which keeps long lists smooth on phones.
+   Palette is tailoring-native: indigo ink, brass, plum, teal.
+   ===================================================================== */
+:root {
+  --brass: #b8935a;
+  --accent-glow: rgba(24, 42, 82, 0.42);
+
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-strong: rgba(255, 253, 248, 0.80);
+  --glass-nested: rgba(255, 255, 255, 0.42);
+  --glass-field: rgba(255, 255, 255, 0.52);
+  --glass-field-hover: rgba(255, 255, 255, 0.72);
+  --glass-focus: rgba(255, 255, 255, 0.88);
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --glass-edge-low: rgba(255, 255, 255, 0.22);
+  --glass-line: rgba(60, 45, 20, 0.10);
+  --glass-sheen: linear-gradient(155deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0) 100%);
+  --glass-blur: saturate(170%) blur(22px);
+  --glass-shadow: 0 0 0 0.5px var(--glass-line),
+                  inset 0 1px 0 var(--glass-edge),
+                  inset 0 -1px 0 var(--glass-edge-low),
+                  0 20px 40px -22px rgba(36, 30, 18, 0.30),
+                  0 2px 6px rgba(36, 30, 18, 0.05);
+
+  --ambient:
+    radial-gradient(62vmax 52vmax at 6% -6%,  rgba(36, 59, 107, 0.30), transparent 62%),
+    radial-gradient(56vmax 46vmax at 106% 30%, rgba(184, 147, 90, 0.32), transparent 64%),
+    radial-gradient(60vmax 50vmax at 18% 110%, rgba(122, 77, 143, 0.20), transparent 62%),
+    radial-gradient(40vmax 34vmax at 72% 80%,  rgba(43, 127, 140, 0.14), transparent 62%);
+  --grain-opacity: 0.05;
+}
+
+html.dark-mode {
+  --brass: #d4ad72;
+  --accent-glow: rgba(91, 120, 196, 0.45);
+
+  --glass: rgba(38, 34, 30, 0.52);
+  --glass-strong: rgba(30, 27, 24, 0.78);
+  --glass-nested: rgba(255, 244, 225, 0.05);
+  --glass-field: rgba(255, 244, 225, 0.07);
+  --glass-field-hover: rgba(255, 244, 225, 0.11);
+  --glass-focus: rgba(255, 244, 225, 0.14);
+  --glass-edge: rgba(255, 244, 225, 0.16);
+  --glass-edge-low: rgba(0, 0, 0, 0.35);
+  --glass-line: rgba(255, 244, 225, 0.09);
+  --glass-sheen: linear-gradient(155deg, rgba(255,244,225,0.10) 0%, rgba(255,244,225,0.03) 40%, rgba(255,244,225,0) 100%);
+  --glass-shadow: 0 0 0 0.5px var(--glass-line),
+                  inset 0 1px 0 var(--glass-edge),
+                  inset 0 -1px 0 var(--glass-edge-low),
+                  0 24px 48px -22px rgba(0, 0, 0, 0.75),
+                  0 2px 8px rgba(0, 0, 0, 0.35);
+
+  --ambient:
+    radial-gradient(62vmax 52vmax at 6% -6%,  rgba(91, 120, 196, 0.26), transparent 62%),
+    radial-gradient(56vmax 46vmax at 106% 30%, rgba(217, 154, 58, 0.16), transparent 64%),
+    radial-gradient(60vmax 50vmax at 18% 110%, rgba(176, 135, 196, 0.18), transparent 62%),
+    radial-gradient(40vmax 34vmax at 72% 80%,  rgba(95, 180, 192, 0.11), transparent 62%);
+  --grain-opacity: 0.07;
+}
+
+/* ---------- Ambient light field + grain ---------- */
+body::before {
+  content: ""; position: fixed; inset: -10vmax; z-index: -1; pointer-events: none;
+  background: var(--ambient);
+  will-change: transform;
+}
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+@media (prefers-reduced-motion: no-preference) {
+  body::before { animation: ambient-drift 48s ease-in-out infinite alternate; }
+  @keyframes ambient-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(2.2vmax, -1.6vmax, 0) scale(1.07); }
+  }
+}
+#loadingScreen, #signInScreen { background: var(--ambient), var(--bg); }
+
+/* ---------- Glass surfaces ---------- */
+.card, .history-card, .dashboard-stat-card, .dashboard-section-card,
+.settings-card, .sal-card, .sal-stat, .receipt-ticket, .signed-in-bar {
+  background: var(--glass-sheen), var(--glass);
+  box-shadow: var(--glass-shadow);
+  /* anything inside that used the solid field/surface becomes translucent too */
+  --field: var(--glass-field);
+  --field-hover: var(--glass-field-hover);
+  --surface: var(--glass-focus);
+}
+/* Blur only on the few large, top-level surfaces */
+.card, .dashboard-stat-card, .dashboard-section-card, .settings-card {
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+.item-block { background: var(--glass-nested); box-shadow: inset 0 1px 0 var(--glass-edge), 0 0 0 0.5px var(--glass-line); }
+.item-block.expanded { box-shadow: inset 0 1px 0 var(--glass-edge), 0 0 0 0.5px var(--glass-line), 0 14px 30px -16px rgba(36, 30, 18, 0.30); }
+
+/* Dashboard stat cards pick up a faint glow from their own status colour */
+.dashboard-stat-card {
+  background: radial-gradient(120% 120% at 100% 0%, var(--c-tint, transparent), transparent 60%), var(--glass-sheen), var(--glass);
+}
+
+/* ---------- Fields: frosted wells, crisp on focus ---------- */
+input[type="text"], input[type="tel"], input[type="number"], input[type="password"], textarea, .custom-select-trigger, .notesInput {
+  background: var(--glass-field);
+  box-shadow: inset 0 1px 2px rgba(36, 30, 18, 0.06), inset 0 0 0 0.5px var(--glass-line);
+}
+input[type="text"]:focus, input[type="tel"]:focus, input[type="number"]:focus, input[type="password"]:focus,
+textarea:focus, .notesInput:focus, .custom-select-trigger.open {
+  background: var(--glass-focus) !important;
+  box-shadow: 0 0 0 4px var(--accent-ring), inset 0 0 0 1px var(--accent);
+}
+
+/* ---------- Navigation + floating bar: real glass, content scrolls beneath ---------- */
+.tab-switcher {
+  background: var(--glass-sheen), var(--material);
+  -webkit-backdrop-filter: saturate(190%) blur(30px); backdrop-filter: saturate(190%) blur(30px);
+  box-shadow: inset 0 1px 0 var(--glass-edge);
+}
+.summary-bar {
+  background: var(--glass-sheen), var(--material-thick);
+  -webkit-backdrop-filter: saturate(190%) blur(30px); backdrop-filter: saturate(190%) blur(30px);
+  box-shadow: 0 0 0 0.5px var(--glass-line), inset 0 1px 0 var(--glass-edge), inset 0 -1px 0 var(--glass-edge-low),
+              0 22px 44px -18px rgba(36, 30, 18, 0.38);
+}
+@media (min-width: 880px) {
+  .tab-switcher { box-shadow: inset -1px 0 0 var(--glass-edge); }
+}
+
+/* ---------- Sheets + modals ---------- */
+.modal-overlay, .success-overlay, .calendar-popup-overlay, .picker-sheet-overlay {
+  background: radial-gradient(80% 60% at 50% 100%, rgba(36, 59, 107, 0.22), transparent 70%), var(--scrim);
+  -webkit-backdrop-filter: saturate(140%) blur(14px); backdrop-filter: saturate(140%) blur(14px);
+}
+.modal-card, .success-card, .picker-sheet, .calendar-popup {
+  background: var(--glass-sheen), var(--glass-strong);
+  -webkit-backdrop-filter: saturate(180%) blur(40px); backdrop-filter: saturate(180%) blur(40px);
+  box-shadow: 0 0 0 0.5px var(--glass-line), inset 0 1px 0 var(--glass-edge), var(--shadow-3);
+  --field: var(--glass-field);
+  --field-hover: var(--glass-field-hover);
+}
+
+/* ---------- Primary actions: lit from above, brass hairline on key CTA ---------- */
+.modal-action-btn, .success-close-btn, #footerBtn, #signInScreen .signin-submit, .sal-btn.primary {
+  background-color: var(--accent);
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0) 58%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(0,0,0,0.18), 0 8px 18px -8px var(--accent-glow);
+}
+#footerBtn { box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), inset 0 0 0 0.5px var(--brass), 0 8px 18px -8px var(--accent-glow); }
+.modal-action-btn-whatsapp {
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0) 58%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 8px 18px -8px rgba(31, 157, 85, 0.5);
+}
+.hf-chip, .pagesize-group, .sal-type-group, .sal-seg { box-shadow: inset 0 0 0 0.5px var(--glass-line); }
+.hf-chip.on { background-image: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 6px 14px -6px var(--accent-glow); }
+@media (min-width: 880px) {
+  .tab-btn.active { background-image: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 8px 18px -10px var(--accent-glow); }
+}
+
+/* Sign-in: glass inputs and a lit logo tile */
+#signInScreen input { background: var(--glass-field); box-shadow: inset 0 0 0 0.5px var(--glass-line), 0 10px 24px -14px rgba(36,30,18,0.3); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+#signInScreen input:focus { background: var(--glass-focus); }
+#signInScreen .signin-mark, #loadingScreen .loading-mark { box-shadow: 0 0 0 0.5px var(--glass-line), inset 0 1px 0 var(--glass-edge), 0 18px 40px -14px rgba(36,30,18,0.4); }
+
+/* ---------- Fallbacks: glass must never cost legibility ---------- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --glass: rgba(255,254,251,0.92); --glass-strong: rgba(255,254,251,0.98); }
+  html.dark-mode { --glass: rgba(30,27,24,0.94); --glass-strong: rgba(26,24,22,0.98); }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  :root { --glass: var(--surface); --glass-strong: var(--surface); --glass-nested: var(--field); --glass-sheen: none; --glass-field: var(--field); --glass-focus: var(--surface); }
+  html.dark-mode { --glass: #1a1816; --glass-strong: #1a1816; }
+  .card, .dashboard-stat-card, .dashboard-section-card, .settings-card, .tab-switcher, .summary-bar, .modal-card, .success-card, .picker-sheet, .calendar-popup { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 </style>
 
 </head>
