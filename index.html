@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f2f2f7" id="themeColorMeta">
+<meta name="theme-color" content="#f4f1ea" id="themeColorMeta">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
       if (localStorage.getItem('stDarkMode') === 'on') {
         document.documentElement.classList.add('dark-mode');
         var meta = document.getElementById('themeColorMeta');
-        if (meta) meta.setAttribute('content', '#000000');
+        if (meta) meta.setAttribute('content', '#11100e');
       }
     } catch (e) {}
   })();
@@ -1287,6 +1287,32 @@ html.dark-mode .tab-btn.active { color: var(--accent-strong); }
 html.dark-mode .skel::after { transform: none; background: none; }
 @keyframes skel-pulse { 0%, 100% { opacity: 0; } 50% { opacity: 0.5; background: var(--fill-2); } }
 @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+/* Accent as text on dark surfaces: use the lighter step for contrast */
+html.dark-mode .history-card-ticket, html.dark-mode .history-card-btn-view, html.dark-mode .history-card-btn-status,
+html.dark-mode .history-card-btn-icon.edit, html.dark-mode .photo-replace-btn, html.dark-mode .settings-row-icon,
+html.dark-mode .salpg-back, html.dark-mode .calendar-nav-btn, html.dark-mode .sal-avatar, html.dark-mode .sal-link,
+html.dark-mode .sal-btn:not(.primary), html.dark-mode .calendar-day-btn.today, html.dark-mode .calendar-today-btn,
+html.dark-mode .calendar-clear-btn, html.dark-mode .cal-nav button, html.dark-mode .dash-sal-stats .net b,
+html.dark-mode .sal-stat.net b, html.dark-mode .salpg-how b, html.dark-mode .check-dot { color: var(--accent-strong); }
+html.dark-mode .picker-sheet-option.selected { color: var(--accent-strong); }
+.history-card-ticket { font-family: var(--font); letter-spacing: 0.01em; }
+
+/* Sign-in + success: calmer, more deliberate */
+#signInScreen { background: var(--bg); }
+#signInScreen .signin-mark { border-radius: 24%; box-shadow: var(--shadow-2); }
+#signInScreen p { font-size: 15px; }
+#signInScreen input { border: 1px solid var(--sep); box-shadow: none; background: var(--surface); }
+#signInScreen input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+.signin-staff-btn.selected { background: var(--accent); color: #fff; }
+.success-checkmark { background: var(--green-tint); color: var(--green); }
+.success-card { padding-top: 26px; }
+#loadingScreen .loading-mark { box-shadow: var(--shadow-2); }
+
+/* Staggered entrance: transition-friendly, short, ease-out */
+@media (prefers-reduced-motion: no-preference) {
+  .history-card { animation-duration: 0.28s; animation-timing-function: var(--ease-out); }
+}
 </style>
 
 </head>
@@ -2762,7 +2788,7 @@ html.dark-mode .skel::after { transform: none; background: none; }
   function applyDarkMode(on) {
     document.documentElement.classList.toggle('dark-mode', on);
     const meta = document.getElementById('themeColorMeta');
-    if (meta) meta.setAttribute('content', on ? '#000000' : '#f2f2f7');
+    if (meta) meta.setAttribute('content', on ? '#11100e' : '#f4f1ea');
     const toggle = document.getElementById('darkModeToggle');
     if (toggle) toggle.checked = on;
     const iconWrap = document.getElementById('darkModeRowIcon');
@@ -4025,7 +4051,7 @@ html.dark-mode .skel::after { transform: none; background: none; }
   // the .order-view CSS, then triggers the browser print dialog. Every
   // browser's print dialog has a "Save as PDF" destination, so this gives
   // a downloadable/printable receipt with no extra libraries needed.
-  const ORDER_VIEW_PRINT_CSS = '.order-view{background:#fff;padding:18px;color:#202124}.order-view-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:2px solid #168a5b;padding-bottom:14px;margin-bottom:14px}.order-view-title h3{margin:0 0 3px;font-size:20px}.order-view-title span{font-size:11px;color:#6b6b6b}.order-view-title>b{font-size:11px;background:#eaf3ef;color:#0f5c3d;padding:6px 8px;border-radius:6px}.order-view-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.order-view-grid div{background:#f7f7f7;padding:10px;border-radius:7px}.order-view-grid span{display:block;font-size:10px;color:#6b6b6b;margin-bottom:3px}.order-view-grid strong{font-size:13px;word-break:break-word}.order-view-item{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px;break-inside:avoid}.order-view-item-head{display:flex;justify-content:space-between;gap:10px;font-size:14px}.order-view-sub{font-size:11px;color:#666;margin-top:5px}.order-view-measures{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;background:#f7f7f7;border-radius:7px;padding:10px;margin-top:10px}.order-view-measures span{font-size:11px;word-break:break-word}.order-view-empty{font-size:11px;color:#999;font-style:italic;margin-top:9px}.order-view-notes{font-size:11px;margin-top:9px;background:#f7f7f7;padding:8px;border-radius:6px}.order-view-photo{margin-top:9px}.order-view-photo img{max-width:120px;max-height:120px;border-radius:8px;border:1px solid #ddd;object-fit:cover;display:block}.order-view-money{border-top:2px solid #ddd;margin-top:16px;padding-top:10px}.order-view-money div{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.order-view-money .balance{border-top:1px solid #ddd;margin-top:4px;padding-top:10px;font-size:15px;color:#c9363e}.sheet-status{display:inline-block;font-size:11px;padding:4px 8px;border-radius:6px;background:#eaf3ef;color:#0f5c3d;border:1px solid #cfe3da}';
+  const ORDER_VIEW_PRINT_CSS = '.order-view{background:#fff;padding:18px;color:#202124}.order-view-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:2px solid #243b6b;padding-bottom:14px;margin-bottom:14px}.order-view-title h3{margin:0 0 3px;font-size:20px}.order-view-title span{font-size:11px;color:#6b6b6b}.order-view-title>b{font-size:11px;background:#eceff6;color:#243b6b;padding:6px 8px;border-radius:6px}.order-view-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.order-view-grid div{background:#f7f7f7;padding:10px;border-radius:7px}.order-view-grid span{display:block;font-size:10px;color:#6b6b6b;margin-bottom:3px}.order-view-grid strong{font-size:13px;word-break:break-word}.order-view-item{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:10px;break-inside:avoid}.order-view-item-head{display:flex;justify-content:space-between;gap:10px;font-size:14px}.order-view-sub{font-size:11px;color:#666;margin-top:5px}.order-view-measures{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;background:#f7f7f7;border-radius:7px;padding:10px;margin-top:10px}.order-view-measures span{font-size:11px;word-break:break-word}.order-view-empty{font-size:11px;color:#999;font-style:italic;margin-top:9px}.order-view-notes{font-size:11px;margin-top:9px;background:#f7f7f7;padding:8px;border-radius:6px}.order-view-photo{margin-top:9px}.order-view-photo img{max-width:120px;max-height:120px;border-radius:8px;border:1px solid #ddd;object-fit:cover;display:block}.order-view-money{border-top:2px solid #ddd;margin-top:16px;padding-top:10px}.order-view-money div{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.order-view-money .balance{border-top:1px solid #ddd;margin-top:4px;padding-top:10px;font-size:15px;color:#a22f24}.sheet-status{display:inline-block;font-size:11px;padding:4px 8px;border-radius:6px;background:#eceff6;color:#243b6b;border:1px solid #cdd5e6}';
 
   function printReceiptForOrder(order) {
     if (!order) { appAlert('No order to print.'); return; }
@@ -4080,12 +4106,12 @@ html.dark-mode .skel::after { transform: none; background: none; }
     const parts = function (str) { const m = String(waDate(str)).match(/^(.*?) \((.*)\)$/); return m ? [m[1], m[2]] : [String(waDate(str)), '']; };
 
     const due = parseDMY(cleanDeliveryDate(order.deliveryDate), '-');
-    let chip = { t: '', c: '#007aff', bg: 'rgba(0,122,255,.12)' };
-    if (delivered) chip = { t: 'Delivered', c: '#1f9d45', bg: 'rgba(52,199,89,.16)' };
+    let chip = { t: '', c: '#243b6b', bg: 'rgba(36,59,107,.09)' };
+    if (delivered) chip = { t: 'Delivered', c: '#2f7d4f', bg: 'rgba(47,125,79,.11)' };
     else if (due) {
       const d = daysBetween(new Date(), due);
-      chip = d < 0 ? { t: Math.abs(d) + ' day' + (Math.abs(d) === 1 ? '' : 's') + ' overdue', c: '#d70015', bg: 'rgba(255,59,48,.12)' }
-        : { t: d === 0 ? 'Due today' : d === 1 ? 'Due tomorrow' : 'In ' + d + ' days', c: '#007aff', bg: 'rgba(0,122,255,.12)' };
+      chip = d < 0 ? { t: Math.abs(d) + ' day' + (Math.abs(d) === 1 ? '' : 's') + ' overdue', c: '#a22f24', bg: 'rgba(183,58,46,.09)' }
+        : { t: d === 0 ? 'Due today' : d === 1 ? 'Due tomorrow' : 'In ' + d + ' days', c: '#243b6b', bg: 'rgba(36,59,107,.09)' };
     }
 
     const items = (order.itemTypes || []).map(function (type, i) {
@@ -4114,48 +4140,48 @@ html.dark-mode .skel::after { transform: none; background: none; }
         ctx.font = '700 11px ' + FONT; const w = ctx.measureText(txt).width + 18;
         R(xRight - w, y, w, 22, 11, bg); T(txt, xRight - w / 2, y + 15, 11, 700, c, 'center');
       };
-      ctx.fillStyle = '#f2f2f7'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#f1ede4'; ctx.fillRect(0, 0, W, H);
       const CX = 12, CW = W - 24; let y = 12;
       R(CX, y, CW, H - 24, 22, '#ffffff');
       const L = CX + PAD, Rr = CX + CW - PAD;
       y += 40;
-      T('SARDAR TAILORING', W / 2, y, 21, 800, '#1c1c1e', 'center'); y += 20;
-      T('Bespoke Suit & Tailoring Shop', W / 2, y, 12, 500, '#8e8e93', 'center'); y += 20;
-      ctx.fillStyle = '#e5e5ea'; ctx.fillRect(L, y, Rr - L, 1); y += 24;
+      T('SARDAR TAILORING', W / 2, y, 21, 800, '#1b1a17', 'center'); y += 20;
+      T('Bespoke Suit & Tailoring Shop', W / 2, y, 12, 500, '#8a857b', 'center'); y += 20;
+      ctx.fillStyle = '#e3ddd0'; ctx.fillRect(L, y, Rr - L, 1); y += 24;
       // customer + ticket
-      T(order.customerName || '', L, y, 18, 700, '#1c1c1e'); 
+      T(order.customerName || '', L, y, 18, 700, '#1b1a17'); 
       ctx.font = '700 12px ' + FONT; const tw = ctx.measureText(order.ticketId || '').width + 20;
-      R(Rr - tw, y - 16, tw, 24, 12, 'rgba(0,122,255,.12)'); T(order.ticketId || '', Rr - tw / 2, y, 12, 700, '#007aff', 'center');
-      y += 20; T(order.phoneNumber || '-', L, y, 13, 500, '#8e8e93'); y += 28;
+      R(Rr - tw, y - 16, tw, 24, 12, 'rgba(36,59,107,.09)'); T(order.ticketId || '', Rr - tw / 2, y, 12, 700, '#243b6b', 'center');
+      y += 20; T(order.phoneNumber || '-', L, y, 13, 500, '#8a857b'); y += 28;
       // dates
       const o = order.dateSubmitted ? parts(order.dateSubmitted) : null, r = parts(order.deliveryDate), mid = W / 2 + 4;
-      R(L, y, Rr - L, 74, 14, '#f2f2f7');
-      T('ORDERED', L + 14, y + 22, 10, 700, '#8e8e93'); T('READY BY', mid, y + 22, 10, 700, '#8e8e93');
-      if (o) { T(o[0], L + 14, y + 42, 14, 700, '#1c1c1e'); T(o[1], L + 14, y + 58, 11, 500, '#8e8e93'); }
-      T(r[0], mid, y + 42, 14, 700, '#1c1c1e'); T(r[1], mid, y + 58, 11, 500, '#8e8e93');
+      R(L, y, Rr - L, 74, 14, '#f1ede4');
+      T('ORDERED', L + 14, y + 22, 10, 700, '#8a857b'); T('READY BY', mid, y + 22, 10, 700, '#8a857b');
+      if (o) { T(o[0], L + 14, y + 42, 14, 700, '#1b1a17'); T(o[1], L + 14, y + 58, 11, 500, '#8a857b'); }
+      T(r[0], mid, y + 42, 14, 700, '#1b1a17'); T(r[1], mid, y + 58, 11, 500, '#8a857b');
       y += 74 + 14;
       if (chip.t) { chipDraw(chip.t, Rr, y, chip.c, chip.bg); y += 22 + 16; } else y += 4;
       // items
-      T('ITEMS', L, y, 11, 700, '#8e8e93'); y += 20;
+      T('ITEMS', L, y, 11, 700, '#8a857b'); y += 20;
       items.forEach(function (it, i) {
-        R(L, y - 14, 22, 22, 11, '#007aff'); T(String(i + 1), L + 11, y + 1, 12, 700, '#ffffff', 'center');
-        T(it.type, L + 32, y + 2, 15, 700, '#1c1c1e'); y += 22;
-        if (it.look) y = wrap(it.look, L + 32, y, 13, 500, '#3a3a3c', Rr - L - 32, 18);
-        if (it.meas) y = wrap(it.meas, L + 32, y, 12.5, 500, '#6c6c70', Rr - L - 32, 17);
-        if (it.note) y = wrap('Note: ' + it.note, L + 32, y, 12, 500, '#8e8e93', Rr - L - 32, 17);
+        R(L, y - 14, 22, 22, 11, '#243b6b'); T(String(i + 1), L + 11, y + 1, 12, 700, '#ffffff', 'center');
+        T(it.type, L + 32, y + 2, 15, 700, '#1b1a17'); y += 22;
+        if (it.look) y = wrap(it.look, L + 32, y, 13, 500, '#3b3833', Rr - L - 32, 18);
+        if (it.meas) y = wrap(it.meas, L + 32, y, 12.5, 500, '#6b665d', Rr - L - 32, 17);
+        if (it.note) y = wrap('Note: ' + it.note, L + 32, y, 12, 500, '#8a857b', Rr - L - 32, 17);
         y += 10;
       });
       // payment
-      y += 4; R(L, y, Rr - L, 112, 14, '#f2f2f7');
-      const row = function (label, val, yy, bold, color) { T(label, L + 16, yy, bold ? 15 : 14, bold ? 700 : 500, '#3a3a3c'); T(val, Rr - 16, yy, bold ? 16 : 14, bold ? 800 : 600, color || '#1c1c1e', 'right'); };
+      y += 4; R(L, y, Rr - L, 112, 14, '#f1ede4');
+      const row = function (label, val, yy, bold, color) { T(label, L + 16, yy, bold ? 15 : 14, bold ? 700 : 500, '#3b3833'); T(val, Rr - 16, yy, bold ? 16 : 14, bold ? 800 : 600, color || '#1b1a17', 'right'); };
       row('Total', npr(total), y + 30); row('Advance paid', npr(advance), y + 56);
-      ctx.fillStyle = '#d1d1d6'; ctx.fillRect(L + 16, y + 68, Rr - L - 32, 1);
-      row(paid ? 'Balance' : 'Balance due', paid ? 'Paid in full' : npr(balance), y + 94, true, paid ? '#1f9d45' : '#d70015');
+      ctx.fillStyle = '#d6d0c3'; ctx.fillRect(L + 16, y + 68, Rr - L - 32, 1);
+      row(paid ? 'Balance' : 'Balance due', paid ? 'Paid in full' : npr(balance), y + 94, true, paid ? '#2f7d4f' : '#a22f24');
       y += 112 + 26;
-      T('Thank you for choosing Sardar Tailoring', W / 2, y, 13, 600, '#3a3a3c', 'center'); y += 18;
-      T('Please show this ticket when collecting', W / 2, y, 11.5, 500, '#8e8e93', 'center'); y += 18;
-      if (SHOP_INFO.phone) { T(SHOP_INFO.phone, W / 2, y, 12, 600, '#007aff', 'center'); y += 18; }
-      if (SHOP_INFO.address) { T(SHOP_INFO.address, W / 2, y, 11.5, 500, '#8e8e93', 'center'); y += 18; }
+      T('Thank you for choosing Sardar Tailoring', W / 2, y, 13, 600, '#3b3833', 'center'); y += 18;
+      T('Please show this ticket when collecting', W / 2, y, 11.5, 500, '#8a857b', 'center'); y += 18;
+      if (SHOP_INFO.phone) { T(SHOP_INFO.phone, W / 2, y, 12, 600, '#243b6b', 'center'); y += 18; }
+      if (SHOP_INFO.address) { T(SHOP_INFO.address, W / 2, y, 11.5, 500, '#8a857b', 'center'); y += 18; }
       return y + 28;
     }
     const probe = document.createElement('canvas').getContext('2d');
@@ -4252,7 +4278,7 @@ html.dark-mode .skel::after { transform: none; background: none; }
     const staffLine = (order.lastEditedBy && order.lastEditedBy !== order.createdBy)
       ? `Created by ${esc(order.createdBy || '-')} &nbsp;•&nbsp; Last edited by ${esc(order.lastEditedBy)}`
       : (order.createdBy ? `Created by ${esc(order.createdBy)}` : '');
-    return `<div class="order-view"><div class="order-view-title"><div><h3>ORDER VIEW</h3><span>Complete order details & measurements</span></div><b>${esc(order.ticketId)}</b></div><div class="order-view-grid"><div><span>Customer</span><strong>${esc(order.customerName)}</strong></div><div><span>Phone</span><strong>${esc(order.phoneNumber)}</strong></div><div><span>Order Date</span><strong>${esc(order.dateSubmitted)}</strong></div><div><span>Delivery Date</span><strong>${esc(order.deliveryDate)}</strong></div></div>${staffLine ? `<div style="font-size:11.5px;color:#8a5257;margin:-8px 0 14px;">${staffLine}</div>` : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;">${isDelivered ? '<span class="sheet-status synced">Delivered</span>' : ''}${isFullyPaid ? '<span class="sheet-status synced">Fully Paid</span>' : ''}</div><div class="order-view-items">${itemsHtml}</div><div class="order-view-money"><div><span>Total Amount</span><b>NPR ${total.toLocaleString('en-IN')}</b></div><div><span>Advance Paid</span><b>NPR ${advance.toLocaleString('en-IN')}</b></div><div class="balance"><span>Balance Remaining</span><b>NPR ${balance.toLocaleString('en-IN')}</b></div></div></div>`;
+    return `<div class="order-view"><div class="order-view-title"><div><h3>ORDER VIEW</h3><span>Complete order details & measurements</span></div><b>${esc(order.ticketId)}</b></div><div class="order-view-grid"><div><span>Customer</span><strong>${esc(order.customerName)}</strong></div><div><span>Phone</span><strong>${esc(order.phoneNumber)}</strong></div><div><span>Order Date</span><strong>${esc(order.dateSubmitted)}</strong></div><div><span>Delivery Date</span><strong>${esc(order.deliveryDate)}</strong></div></div>${staffLine ? `<div style="font-size:11.5px;color:var(--label-2);margin:-8px 0 14px;">${staffLine}</div>` : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;">${isDelivered ? '<span class="sheet-status synced">Delivered</span>' : ''}${isFullyPaid ? '<span class="sheet-status synced">Fully Paid</span>' : ''}</div><div class="order-view-items">${itemsHtml}</div><div class="order-view-money"><div><span>Total Amount</span><b>NPR ${total.toLocaleString('en-IN')}</b></div><div><span>Advance Paid</span><b>NPR ${advance.toLocaleString('en-IN')}</b></div><div class="balance"><span>Balance Remaining</span><b>NPR ${balance.toLocaleString('en-IN')}</b></div></div></div>`;
   }
 
   // Live Ticket Receipt Preview
@@ -4328,7 +4354,7 @@ html.dark-mode .skel::after { transform: none; background: none; }
           <div class="receipt-logo">SARDAR TAILORING</div>
           <div class="receipt-subtitle">Bespoke Suit & Tailoring Shop</div>
         </div>
-        <div style="color:#8a6066;font-style:italic;text-align:center;padding:24px 0;">No tailoring pieces added yet</div>
+        <div style="color:var(--label-2);font-style:italic;text-align:center;padding:24px 0;">No tailoring pieces added yet</div>
       `;
     } else {
       container.innerHTML = generateReceiptHTML(currentOrderMock);
@@ -4740,9 +4766,9 @@ html.dark-mode .skel::after { transform: none; background: none; }
   function showHistorySyncBanner(message) {
     const banner = document.getElementById('historySyncBanner');
     if (!banner) return;
-    banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:13px;line-height:1.4;';
+    banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:var(--orange-tint);border:1px solid var(--brand-orange-border);color:var(--orange-ink);font-size:13px;line-height:1.4;';
     banner.innerHTML = '<span>' + message + '</span>' +
-      '<button type="button" onclick="renderHistoryList()" style="flex-shrink:0;padding:6px 12px;border-radius:8px;border:1px solid #fdba74;background:#fff;color:#9a3412;font-size:12px;font-weight:600;cursor:pointer;">Retry</button>';
+      '<button type="button" onclick="renderHistoryList()" style="flex-shrink:0;padding:6px 12px;border-radius:8px;border:1px solid var(--brand-orange-border);background:var(--surface);color:var(--orange-ink);font-size:12px;font-weight:600;cursor:pointer;">Retry</button>';
   }
 
   function hideHistorySyncBanner() {
@@ -5096,9 +5122,9 @@ html.dark-mode .skel::after { transform: none; background: none; }
     if (offline) {
       const dashLastSync = formatSyncTime(getLastSyncTime());
       const dashNote = dashLastSync ? ('Showing data synced ' + dashLastSync + ' — could not reach Google Sheets.') : 'Could not reach Google Sheets, and no saved data is on this device yet.';
-      html += '<div class="dashboard-empty" style="padding:0 0 14px;color:#9a3412;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">' +
+      html += '<div class="dashboard-empty" style="padding:0 0 14px;color:var(--orange-ink);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">' +
         '<span>' + dashNote + '</span>' +
-        '<button type="button" onclick="renderDashboard()" style="flex-shrink:0;padding:6px 12px;border-radius:8px;border:1px solid #fdba74;background:#fff;color:#9a3412;font-size:12px;font-weight:600;cursor:pointer;">Retry</button>' +
+        '<button type="button" onclick="renderDashboard()" style="flex-shrink:0;padding:6px 12px;border-radius:8px;border:1px solid var(--brand-orange-border);background:var(--surface);color:var(--orange-ink);font-size:12px;font-weight:600;cursor:pointer;">Retry</button>' +
         '</div>';
     }
 
