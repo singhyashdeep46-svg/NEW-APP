@@ -1494,6 +1494,218 @@ textarea:focus, .notesInput:focus, .custom-select-trigger.open {
   html.dark-mode { --glass: #1a1816; --glass-strong: #1a1816; }
   .card, .dashboard-stat-card, .dashboard-section-card, .settings-card, .tab-switcher, .summary-bar, .modal-card, .success-card, .picker-sheet, .calendar-popup { -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
+
+/* ---------- Search bar: one glass pill, input is a transparent child ---------- */
+.history-search-bar {
+  background: var(--glass-sheen), var(--glass);
+  box-shadow: 0 0 0 0.5px var(--glass-line), inset 0 1px 0 var(--glass-edge), 0 10px 24px -16px rgba(36, 30, 18, 0.28);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+.history-search-bar:focus-within {
+  background: var(--glass-focus);
+  box-shadow: 0 0 0 4px var(--accent-ring), inset 0 0 0 1px var(--accent);
+}
+.history-search-bar input,
+.history-search-bar input:focus {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  outline: none;
+}
+.history-search-bar > svg { color: var(--label-2); }
+.history-search-clear { background: var(--fill); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style id="fin-theme">
+/* =====================================================================
+   FIN THEME LAYER — visuals only (glass, ambient colour, floating nav,
+   pastel cards, blur-in motion). No markup or logic changes.
+   ===================================================================== */
+:root{
+  --font:"Inter Tight","Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-display:var(--font);
+  --accent:#3b6cff; --accent-strong:#2253ee;
+  --accent-tint:rgba(59,108,255,.11); --accent-ring:rgba(59,108,255,.26);
+  --bg:#f4f3f5; --surface:#ffffff; --surface-raised:#ffffff;
+  --field:rgba(20,18,30,.055); --field-hover:rgba(20,18,30,.08);
+  --fill:#e6e4ea; --fill-2:rgba(20,18,30,.045);
+  --label:#0b0b0d; --label-2:rgba(11,11,13,.62); --label-3:#9a98a3;
+  --sep:#e6e4ea; --sep-strong:rgba(20,18,30,.14);
+  --lilac:#e4c6ef; --lime:#ecf19a; --violet:#9b6bea; --peri:#c2c9ee; --mint:#c4ecd6; --peach:#f6cdb8;
+  --gl:color-mix(in srgb,var(--surface) 52%,transparent);
+  --rim:rgba(255,255,255,.78);
+  --material:color-mix(in srgb,var(--bg) 70%,transparent);
+  --material-thick:color-mix(in srgb,var(--bg) 78%,transparent);
+  --shadow-1:inset 0 0 0 1px var(--rim),inset 0 1px 0 var(--rim),0 10px 30px rgba(30,20,60,.07);
+  --shadow-2:inset 0 0 0 1px var(--rim),0 14px 40px rgba(30,20,60,.14);
+  --shadow-3:0 -1px 0 rgba(255,255,255,.6) inset,0 -20px 60px rgba(0,0,0,.15);
+  --r-md:16px; --r-lg:26px; --r-xl:32px;
+  --out:cubic-bezier(.23,1,.32,1);
+}
+html.dark-mode{
+  --accent:#6f93ff; --accent-strong:#8aa8ff;
+  --accent-tint:rgba(111,147,255,.17); --accent-ring:rgba(111,147,255,.34);
+  --bg:#0d0d10; --surface:#1a1a1f; --surface-raised:#222228;
+  --field:rgba(255,255,255,.07); --field-hover:rgba(255,255,255,.1);
+  --fill:#2a2a31; --fill-2:rgba(255,255,255,.05);
+  --label:#f4f3f5; --label-2:rgba(244,243,245,.64); --label-3:#7d7b86;
+  --sep:#2a2a31; --sep-strong:rgba(255,255,255,.18);
+  --rim:rgba(255,255,255,.12);
+  --shadow-1:inset 0 0 0 1px var(--rim),inset 0 1px 0 var(--rim),0 10px 30px rgba(0,0,0,.35);
+  --shadow-2:inset 0 0 0 1px var(--rim),0 16px 44px rgba(0,0,0,.55);
+  --shadow-3:0 -1px 0 rgba(255,255,255,.1) inset,0 -20px 60px rgba(0,0,0,.6);
+}
+
+/* ---- ambient colour behind everything (gives the glass something to refract) ---- */
+body{background:var(--bg);font-family:var(--font);letter-spacing:-.011em}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(62% 38% at 12% 6%,color-mix(in srgb,var(--lilac) 90%,transparent),transparent 72%),
+   radial-gradient(55% 34% at 102% 34%,color-mix(in srgb,var(--lime) 75%,transparent),transparent 72%),
+   radial-gradient(70% 40% at -4% 80%,color-mix(in srgb,var(--peri) 85%,transparent),transparent 72%),
+   radial-gradient(50% 30% at 100% 100%,color-mix(in srgb,var(--mint) 70%,transparent),transparent 72%)}
+html.dark-mode body::before{opacity:.3}
+
+/* ---- type: big, tight, medium weight ---- */
+#orderHistoryContainer > .section-title-container h2,
+#orderDashboardContainer > .section-title-container h2,
+#orderSettingsContainer > .section-title-container h2,
+#orderSalaryContainer > .section-title-container h2,
+#signInScreen h2,.success-card h2{font-family:var(--font);font-weight:500;letter-spacing:-.05em;font-size:44px;line-height:1}
+.success-card h2{font-size:34px}
+.brand-card h1{font-family:var(--font);font-weight:600;letter-spacing:-.055em}
+.dashboard-stat-value,.summary-bar .value{font-weight:500;letter-spacing:-.05em}
+.dashboard-stat-value{font-size:34px}
+.section-title-container h2{font-weight:600;color:var(--label-3);letter-spacing:.02em}
+
+/* ---- glass surfaces ---- */
+.card,.item-block,.history-card,.dashboard-section-card,.settings-card,.sal-card,.cal-card,.signed-in-bar,
+.history-search-bar,.salpg-how,.skel-card,.edit-mode-banner{
+  background:var(--gl)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);
+  box-shadow:var(--shadow-1)!important;border-radius:var(--r-lg)}
+.history-card{border-radius:28px}
+.item-block.expanded{box-shadow:var(--shadow-2)!important}
+.history-card-pricing,.dash-sal-stats > div,.sal-stat,.cal-o{background:color-mix(in srgb,var(--surface) 55%,transparent)}
+
+/* pastel stat cards (the Fin "stacked card" palette) */
+.dashboard-stat-card{
+  --pc:var(--lilac);
+  background:color-mix(in srgb,var(--pc) 66%,transparent)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.4),0 10px 28px rgba(30,20,60,.08)!important;
+  border-radius:28px;color:#15121c}
+.dashboard-stat-card.orders{--pc:var(--lilac)}
+.dashboard-stat-card.revenue,.dashboard-stat-card.status-delivered{--pc:var(--mint)}
+.dashboard-stat-card.pending,.dashboard-stat-card.status-pending{--pc:var(--lime)}
+.dashboard-stat-card.delivery{--pc:var(--peri)}
+.dashboard-stat-card.status-notpaid{--pc:var(--peach)}
+.dashboard-stat-card .dashboard-stat-label,.dashboard-stat-card .dashboard-stat-sub{color:rgba(21,18,28,.62)}
+.dashboard-stat-card .dashboard-stat-value{color:#15121c}
+.dashboard-stat-icon{background:rgba(255,255,255,.55);border-radius:12px}
+html.dark-mode .dashboard-stat-card{background:color-mix(in srgb,var(--pc) 24%,var(--surface))!important;color:var(--label);box-shadow:inset 0 0 0 1px var(--rim),0 10px 28px rgba(0,0,0,.4)!important}
+html.dark-mode .dashboard-stat-card .dashboard-stat-label,html.dark-mode .dashboard-stat-card .dashboard-stat-sub{color:var(--label-2)}
+html.dark-mode .dashboard-stat-card .dashboard-stat-value{color:var(--label)}
+html.dark-mode .dashboard-stat-icon{background:rgba(255,255,255,.1)}
+
+/* ---- top bar: glass pill ---- */
+.app-topbar{margin:6px 0 16px;padding:10px 14px;border-radius:30px;background:var(--gl);
+  -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);box-shadow:var(--shadow-1)}
+.brand-card .mark{border-radius:14px;box-shadow:0 0 0 2px var(--rim),0 4px 12px rgba(30,20,60,.12)}
+
+/* ---- floating pill tab bar with raised centre button + sliding indicator ---- */
+.tab-switcher{
+  left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding:9px 8px;border-radius:40px;border:0;align-items:center;
+  background:var(--gl);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+  box-shadow:inset 0 0 0 1px var(--rim),inset 0 1px 0 rgba(255,255,255,.9),0 14px 40px rgba(20,20,40,.14)}
+html.dark-mode .tab-switcher{box-shadow:inset 0 0 0 1px var(--rim),0 14px 40px rgba(0,0,0,.55)}
+.tab-switcher .ind{position:absolute;left:0;top:0;height:32px;width:0;border-radius:16px;background:color-mix(in srgb,var(--accent) 14%,transparent);
+  transition:transform .46s var(--spring),width .3s var(--out),opacity .2s ease;pointer-events:none;opacity:0}
+.tab-btn.active{color:var(--accent);font-weight:700}
+.tab-btn.active .tab-icon{animation:finpop .46s var(--spring)}
+@keyframes finpop{0%{transform:scale(.78)}55%{transform:scale(1.14)}100%{transform:scale(1)}}
+.tab-btn-fab{flex:none;width:56px;height:56px;margin:-18px 6px 0;padding:0;gap:0;justify-content:center;border-radius:50%;
+  color:#fff;font-size:0;background:linear-gradient(160deg,#5b8dff,#2253ee);
+  box-shadow:0 0 0 4px rgba(255,255,255,.9),0 14px 30px rgba(59,108,255,.5);
+  transition:transform .48s cubic-bezier(.34,1.56,.64,1),box-shadow .3s var(--out)}
+html.dark-mode .tab-btn-fab{box-shadow:0 0 0 4px var(--surface),0 14px 30px rgba(59,108,255,.45)}
+.tab-btn-fab .tab-label{display:none}
+.tab-btn-fab .tab-icon,.tab-btn-fab .tab-icon-wrap .tab-icon{width:26px;height:26px;color:#fff}
+.tab-btn-fab.active{color:#fff;transform:translateY(-3px) scale(1.08);box-shadow:0 0 0 4px rgba(255,255,255,.95),0 20px 38px rgba(59,108,255,.65)}
+html.dark-mode .tab-btn-fab.active{box-shadow:0 0 0 4px var(--surface),0 20px 38px rgba(59,108,255,.6)}
+.tab-btn-fab.active .tab-icon{animation:finspin .56s var(--spring)}
+@keyframes finspin{from{transform:rotate(-90deg) scale(.5)}}
+.tab-btn-fab:active{transform:scale(.92)}
+
+/* ---- panels blur-in when you switch tab ---- */
+.tab-panel-enter{animation:finin .38s var(--out) both}
+@keyframes finin{from{opacity:0;transform:translateY(12px) scale(.985);filter:blur(6px)}}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.history-card,.dashboard-stat-card,.dashboard-section-card{animation:rise .52s var(--out) both;animation-delay:var(--card-delay,0s)}
+
+/* ---- controls ---- */
+input[type="text"],input[type="tel"],input[type="number"],input[type="password"],textarea,.custom-select-trigger{
+  background:color-mix(in srgb,var(--surface) 55%,transparent);border:0;border-radius:16px;
+  box-shadow:inset 0 0 0 1px var(--rim)}
+input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-trigger.open{box-shadow:inset 0 0 0 1.5px var(--accent),0 0 0 4px var(--accent-ring)!important}
+.modal-action-btn,.success-close-btn,#footerBtn,#signInScreen .signin-submit,.camera-btn-usephoto{
+  background:var(--accent);border-radius:22px;box-shadow:0 10px 24px rgba(59,108,255,.35)}
+#footerBtn{border-radius:26px}
+.modal-action-btn-secondary,.load-customer-btn,.history-card-btn-view{background:color-mix(in srgb,var(--surface) 55%,transparent);box-shadow:inset 0 0 0 1px var(--rim);color:var(--label);border-radius:20px}
+.history-card-btn-view{color:var(--accent)}
+.hf-chip{background:var(--fill);color:var(--label);border-radius:20px;box-shadow:none}
+.hf-chip.on{background:var(--label);color:var(--bg)}
+.hf-chip.on b{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.cal-seg{background:var(--fill)}
+.cal-day.sel,.sal-day.cu:not(.p):not(.h):not(.a){background:var(--accent)}
+#addItemBtn{background:var(--gl);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:0;box-shadow:inset 0 0 0 1px var(--rim);color:var(--label);border-radius:26px}
+#addItemBtn:hover{background:var(--accent-tint)}
+
+/* ---- floating total bar ---- */
+.summary-bar{border-radius:30px;background:var(--gl);
+  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  box-shadow:inset 0 0 0 1px var(--rim),inset 0 1px 0 rgba(255,255,255,.7),0 14px 40px rgba(20,20,40,.14)}
+
+/* ---- sheets / modals ---- */
+.modal-overlay,.success-overlay,.calendar-popup-overlay,.picker-sheet-overlay{background:rgba(0,0,0,.35);-webkit-backdrop-filter:none;backdrop-filter:none}
+.modal-card,.success-card,.picker-sheet,.calendar-popup{
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  border-radius:32px 32px 0 0;box-shadow:var(--shadow-3);transition:transform .5s var(--spring)}
+.modal-card::before,.success-card::before,.picker-sheet::before,.calendar-popup::before{background:var(--sep-strong);opacity:1}
+.success-checkmark{filter:drop-shadow(0 10px 24px rgba(47,125,79,.35))}
+
+/* ---- splash + sign-in ---- */
+#loadingScreen,#signInScreen{background:color-mix(in srgb,var(--bg) 60%,transparent);-webkit-backdrop-filter:blur(34px);backdrop-filter:blur(34px)}
+#loadingScreen .loading-mark,#signInScreen .signin-mark{border-radius:30%;box-shadow:0 0 0 5px rgba(255,255,255,.85),0 22px 50px rgba(59,108,255,.45)}
+#loadingScreen .loading-mark{animation:mk .9s var(--spring) backwards,breathe 2.2s ease-in-out .9s infinite}
+@keyframes mk{from{opacity:0;transform:scale(.55);filter:blur(10px)}}
+#loadingScreen .loading-title{font-size:44px;font-weight:600;letter-spacing:-.055em;animation:wmi .7s var(--out) .25s backwards}
+@keyframes wmi{from{opacity:0;transform:translateY(14px);filter:blur(6px)}}
+.switch-track{background:var(--fill)}
+
+/* ---- wide screens: floating glass sidebar ---- */
+@media (min-width:880px){
+  .app-topbar{top:12px;left:12px;width:calc(var(--sidebar-w) - 24px);padding:22px 20px 8px;margin:0;border-radius:32px 32px 0 0;
+    background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+  .tab-switcher{top:12px;bottom:12px;left:12px;right:auto;width:calc(var(--sidebar-w) - 24px);padding:100px 10px 14px;border-radius:32px;gap:4px;align-items:stretch}
+  .tab-switcher .ind{display:none}
+  .tab-btn{border-radius:20px;font-weight:600;color:var(--label-3)}
+  .tab-btn.active,.tab-btn-fab.active{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);transform:none;box-shadow:none}
+  .tab-btn.active .tab-icon,.tab-btn-fab.active .tab-icon{color:var(--accent)}
+  .tab-btn-fab{width:auto;height:42px;margin:0;padding:0 12px;border-radius:20px;justify-content:flex-start;gap:12px;font-size:15px;color:var(--label-3);background:none;box-shadow:none}
+  .tab-btn-fab .tab-label{display:inline-flex}
+  .tab-btn-fab .tab-icon,.tab-btn-fab .tab-icon-wrap .tab-icon{width:21px;height:21px;color:var(--label-2)}
+  .tab-btn.active .history-badge{background:var(--accent);color:#fff}
+  .modal-card,.success-card,.picker-sheet,.calendar-popup{border-radius:32px}
+}
+@media (prefers-reduced-transparency:reduce){
+  .card,.item-block,.history-card,.dashboard-section-card,.settings-card,.sal-card,.cal-card,.app-topbar,.tab-switcher,.summary-bar,.modal-card,.success-card,.picker-sheet,.calendar-popup{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--surface)!important}
+  body::before{display:none}
+}
+@media (prefers-reduced-motion:reduce){.tab-panel-enter,.history-card,.dashboard-stat-card,.dashboard-section-card{animation:none!important}}
 </style>
 
 </head>
@@ -6212,6 +6424,20 @@ textarea:focus, .notesInput:focus, .custom-select-trigger.open {
   window.addEventListener('load',queue);
   queue();kb();
 })();
+</script>
+<script>
+/* Fin theme: sliding indicator behind the active tab (visual only) */
+(function(){var nav=document.getElementById('tabSwitcher');if(!nav)return;
+var ind=document.createElement('i');ind.className='ind';nav.insertBefore(ind,nav.firstChild);
+function move(){var b=nav.querySelector('.tab-btn.active:not(.tab-btn-fab)'),ic=b&&b.querySelector('.tab-icon');
+ if(!b||!ic||nav.offsetHeight>200){ind.style.opacity=0;return}
+ var w=Math.min(58,b.offsetWidth-8);ind.style.opacity=1;ind.style.width=w+'px';
+ var br=b.getBoundingClientRect(),ir=ic.getBoundingClientRect(),k=br.height?b.offsetHeight/br.height:1,it=(ir.top-br.top)*k;
+ ind.style.transform='translate('+(b.offsetLeft+(b.offsetWidth-w)/2)+'px,'+(b.offsetTop+it-3.5)+'px)'}
+new MutationObserver(move).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});
+addEventListener('resize',move);addEventListener('load',move);setTimeout(move,400);setTimeout(move,1500);
+if(window.ResizeObserver){var ro=new ResizeObserver(move);ro.observe(nav);nav.querySelectorAll('.tab-btn').forEach(function(x){ro.observe(x)})}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(move)})();
 </script>
 </body>
 </html>
