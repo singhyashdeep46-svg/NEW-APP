@@ -1706,6 +1706,229 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
   body::before{display:none}
 }
 @media (prefers-reduced-motion:reduce){.tab-panel-enter,.history-card,.dashboard-stat-card,.dashboard-section-card{animation:none!important}}
+
+/* =====================================================================
+   ORDER TICKET — redesign of the New Order / billing screen
+   Idea: the form is the tailor's job ticket. Steps are numbered and ruled
+   like a measuring tape; measurements are a tape sheet that fills as you
+   take them; billing leads with the one number that matters — balance due.
+   Scoped to #orderForm so nothing else in the app changes.
+   ===================================================================== */
+#orderFormContainer {
+  --tape: #efe3b6; --tape-fg: #2b2410;
+  --row-h: 56px;
+  counter-reset: step;
+}
+html.dark-mode #orderFormContainer { --tape: #463d22; --tape-fg: #f1e3ad; }
+
+/* ---- Step headers: 01 Customer ———|—|—|—|— ---- */
+#orderForm .section-title-container {
+  counter-increment: step; display: flex; align-items: center; gap: 12px;
+  margin: 34px 2px 12px;
+}
+#orderForm > .section-title-container:first-of-type { margin-top: 8px; }
+#orderForm .section-title-dot { display: none; }
+#orderForm .section-title-container::before {
+  content: counter(step, decimal-leading-zero);
+  font: 600 12px/1 var(--font); font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  color: var(--accent); background: var(--accent-tint); padding: 6px 8px; border-radius: 7px;
+}
+#orderForm .section-title-container h2 {
+  font-family: var(--font-display); font-size: 27px; font-weight: 600; line-height: 1.05;
+  letter-spacing: -.025em; text-transform: none; color: var(--label); margin: 0;
+}
+#orderForm .section-title-container::after {
+  content: ""; flex: 1; height: 12px; align-self: center; opacity: .5;
+  background:
+    repeating-linear-gradient(90deg, var(--label-2) 0 1px, transparent 1px 36px) left bottom / 100% 12px no-repeat,
+    repeating-linear-gradient(90deg, var(--label-2) 0 1px, transparent 1px 6px) left bottom / 100% 6px no-repeat;
+}
+
+/* ---- Grouped rows (customer, billing) ---- */
+#orderForm .card {
+  padding: 0 !important; overflow: hidden; border-radius: 22px;
+  background: var(--surface) !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 0 0 .5px var(--sep-strong), 0 12px 28px -20px rgba(40,32,20,.35) !important;
+}
+#orderForm .card .input-group {
+  display: grid; grid-template-columns: 108px 1fr; align-items: center; column-gap: 8px;
+  margin: 0; padding: 0 18px; min-height: var(--row-h);
+  border-bottom: .5px solid var(--sep); transition: background .2s var(--spring);
+}
+#orderForm .card .input-group:last-child { border-bottom: 0; }
+#orderForm .card .input-group:focus-within { background: var(--accent-tint); }
+#orderForm .card .input-group:has(.input-error) { background: var(--red-tint); }
+#orderForm .card .input-group > label {
+  margin: 0; font-size: 15px; font-weight: 500; color: var(--label); letter-spacing: -.01em;
+}
+#orderForm .card .input-group > input {
+  height: var(--row-h); padding: 0 !important; background: transparent !important;
+  border: 0 !important; box-shadow: none !important; border-radius: 0; font-size: 17px;
+}
+#orderForm .card .input-group > input.input-error { color: var(--red-ink); }
+#orderForm .card .input-group > input[type="number"] {
+  text-align: right; font-variant-numeric: tabular-nums; font-weight: 500;
+}
+#orderForm .card .input-group > #deliveryDate { text-align: right; font-weight: 500; }
+#orderForm .card .input-group > .hint {
+  grid-column: 1 / -1; margin: -8px 0 12px; font-size: 12.5px; color: var(--label-3);
+}
+#orderForm .card .input-group:has(.load-customer-btn) { display: block; padding: 0; min-height: 0; }
+#orderForm .load-customer-btn {
+  justify-content: flex-start; gap: 12px; min-height: var(--row-h); padding: 0 18px;
+  border-radius: 0; background: transparent; color: var(--accent); font-size: 16px; font-weight: 600;
+  transition: background .15s ease-out;
+}
+#orderForm .load-customer-btn::after {
+  content: ""; margin-left: auto; width: 8px; height: 8px;
+  border-right: 2px solid var(--label-3); border-bottom: 2px solid var(--label-3); transform: rotate(-45deg);
+}
+#orderForm .load-customer-btn:active { background: var(--accent-tint); transform: none; }
+#orderForm .load-customer-btn { text-align: left; line-height: 1.2; padding-top: 10px; padding-bottom: 10px; }
+#orderForm .card .input-group:has(.load-customer-btn) > .hint { margin: -4px 18px 14px; }
+
+/* ---- Pieces: each is a ticket with a coloured edge ---- */
+#orderForm .item-block {
+  position: relative; margin-bottom: 12px; border-radius: 22px; overflow: hidden;
+  background: var(--surface) !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 0 0 .5px var(--sep-strong) !important;
+  transition: box-shadow .45s var(--spring);
+}
+#orderForm .item-block::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--ib, var(--accent));
+}
+#orderForm .item-block.expanded { box-shadow: 0 0 0 .5px var(--sep-strong), 0 18px 36px -22px rgba(40,32,20,.45) !important; }
+#orderForm .item-block-header { padding: 14px 16px 14px 20px; min-height: 68px; }
+#orderForm .item-block-header:active { background: var(--fill-2); }
+#orderForm .item-block-num {
+  width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0;
+  font-family: var(--font-display); font-size: 19px; font-weight: 600;
+  background: var(--tape); color: var(--tape-fg); box-shadow: inset 0 0 0 .5px rgba(0,0,0,.12);
+}
+#orderForm .item-block-summary-title { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+#orderForm .item-block-summary-desc { font-size: 13.5px; }
+#orderForm .item-block-body { padding: 4px 16px 18px 20px; border-top: .5px solid var(--sep); }
+#orderForm .item-block.expanded .item-block-body { padding-top: 14px; }
+
+#orderForm .ib-rows { background: var(--field); border-radius: 16px; overflow: hidden; margin-bottom: 4px; }
+#orderForm .ib-rows .input-group {
+  display: grid; grid-template-columns: 92px 1fr; align-items: center; column-gap: 8px;
+  margin: 0; padding: 0 14px; min-height: 52px; border-bottom: .5px solid var(--sep);
+}
+#orderForm .ib-rows .input-group:last-child { border-bottom: 0; }
+#orderForm .ib-rows .input-group:focus-within { background: var(--accent-tint); }
+#orderForm .ib-rows .input-group:has(.input-error) { background: var(--red-tint); }
+#orderForm .ib-rows .input-group > label { margin: 0; font-size: 15px; font-weight: 500; color: var(--label); }
+#orderForm .ib-rows .custom-select-trigger,
+#orderForm .ib-rows input[type="text"] {
+  height: 52px; padding: 0 !important; background: transparent !important; border: 0 !important;
+  box-shadow: none !important; border-radius: 0; font-size: 17px; font-weight: 500;
+}
+#orderForm .ib-rows .custom-select-trigger.placeholder { font-weight: 400; }
+#orderForm .ib-rows .custom-select-trigger.input-error,
+#orderForm .ib-rows input.input-error { color: var(--red-ink); }
+
+/* ---- Measurement tape sheet ---- */
+#orderForm .measureContainer { margin: 20px 0 6px; }
+#orderForm .mx-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 2px 8px; }
+#orderForm .mx-title { font-family: var(--font-display); font-size: 21px; font-weight: 600; letter-spacing: -.02em; color: var(--label); }
+#orderForm .mx-count { font-size: 12.5px; font-weight: 600; color: var(--label-2); font-variant-numeric: tabular-nums; }
+#orderForm .mx-tape { height: 8px; border-radius: 4px; margin: 0 2px 12px; background: var(--tape); overflow: hidden; position: relative; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.1); }
+#orderForm .mx-tape i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 4px; transition: width .5s var(--spring); }
+#orderForm .mx-empty {
+  padding: 22px 16px; border-radius: 16px; text-align: center; font-size: 14px; color: var(--label-2); line-height: 1.4;
+  border: 1.5px dashed var(--sep-strong);
+}
+#orderForm .measure-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+@media (min-width: 560px) { #orderForm .measure-grid { grid-template-columns: repeat(3, 1fr); } }
+#orderForm .measure-input-container {
+  position: relative; padding: 10px 12px 8px; border-radius: 16px; cursor: text;
+  background: var(--field); box-shadow: inset 0 0 0 1.5px transparent;
+  transition: background .2s var(--spring), box-shadow .2s var(--spring), transform .15s ease-out;
+}
+#orderForm .measure-input-container:active { transform: scale(.985); }
+#orderForm .measure-input-container label {
+  margin: 0; font-size: 12px; font-weight: 600; color: var(--label-2); letter-spacing: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 22px;
+}
+#orderForm .measure-input-container::after {
+  content: "in"; position: absolute; right: 12px; bottom: 13px; font-size: 12px; font-weight: 600; color: var(--label-3);
+}
+#orderForm .measure-input {
+  height: 38px !important; padding: 0 !important; border: 0 !important; background: transparent !important;
+  box-shadow: none !important; text-align: left !important; border-radius: 0;
+  font-family: var(--font-display); font-size: 27px !important; font-weight: 500 !important;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--label);
+}
+#orderForm .measure-input::placeholder { color: var(--label-3); opacity: .7; }
+#orderForm .measure-input-container:has(.measure-input:not(:placeholder-shown)) {
+  background: var(--accent-tint); box-shadow: inset 0 0 0 1px var(--accent-ring);
+}
+#orderForm .measure-input-container:has(.measure-input:not(:placeholder-shown)) label { color: var(--accent); }
+#orderForm .measure-input-container:focus-within {
+  background: var(--surface); box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 4px var(--accent-ring);
+}
+#orderForm .measureFreeText { height: 52px; }
+
+/* ---- Notes + photo ---- */
+#orderForm .item-block-body > .input-group { margin: 16px 0 0; }
+#orderForm .item-block-body > .input-group > label { font-size: 13px; font-weight: 600; color: var(--label-2); margin: 0 2px 8px; }
+#orderForm .notesInput {
+  border: 0 !important; background: var(--field) !important; border-radius: 16px !important;
+  padding: 13px 14px !important; font-size: 16px !important; min-height: 72px;
+}
+#orderForm .notesInput:focus { background: var(--surface) !important; box-shadow: inset 0 0 0 2px var(--accent) !important; }
+#orderForm .photo-upload-btn {
+  min-height: 52px; border-radius: 16px; width: 100%; justify-content: center;
+  border: 1.5px dashed var(--sep-strong); background: transparent; color: var(--accent); font-weight: 600;
+  transition: background .15s ease-out, transform .15s ease-out;
+}
+#orderForm .photo-upload-btn:active { transform: scale(.98); background: var(--accent-tint); }
+
+/* ---- Add piece ---- */
+#orderForm #addItemBtn {
+  min-height: var(--row-h); border-radius: 20px; border: 1.5px dashed var(--accent-ring);
+  background: var(--accent-tint); color: var(--accent); font-size: 16px; font-weight: 600;
+  transition: transform .15s ease-out, background .2s var(--spring);
+}
+#orderForm #addItemBtn:active { transform: scale(.98); }
+
+/* ---- Billing: balance due leads ---- */
+#orderForm .bal {
+  position: relative; padding: 18px 18px 22px; background: var(--tape); color: var(--tape-fg);
+  transition: background .4s var(--spring), color .4s var(--spring);
+}
+#orderForm .bal::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; opacity: .45;
+  background:
+    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 36px) left bottom / 100% 12px no-repeat,
+    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 6px) left bottom / 100% 6px no-repeat;
+}
+#orderForm .bal.ok { background: var(--green-tint); color: var(--green-ink); }
+#orderForm .bal.over { background: var(--red-tint); color: var(--red-ink); }
+#orderForm .bal-k { display: block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+#orderForm .bal-v {
+  display: block; margin-top: 4px; font-family: var(--font-display); font-size: 44px; font-weight: 600;
+  letter-spacing: -.035em; line-height: 1.05; font-variant-numeric: tabular-nums;
+}
+#orderForm .bal-bar { height: 6px; border-radius: 3px; margin: 14px 0 8px; background: rgba(0,0,0,.12); overflow: hidden; }
+html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
+#orderForm .bal-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: currentColor; transition: width .5s var(--spring); }
+#orderForm .bal-sub { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; opacity: .85; }
+
+/* ---- Floating total bar ---- */
+.summary-bar .total-tag .due { margin-top: 1px; font-size: 12.5px; font-weight: 500; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.summary-bar .total-tag .due.ok { color: var(--green-ink); }
+.summary-bar .total-tag .due.over { color: var(--red-ink); }
+#footerBtn { transition: transform .15s ease-out, background .2s ease; }
+
+@media (max-width: 380px) {
+  #orderForm .card .input-group { grid-template-columns: 92px 1fr; padding: 0 14px; }
+  #orderForm .bal-v { font-size: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #orderForm *, .summary-bar * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
 </style>
 
 </head>
@@ -1790,12 +2013,12 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
         </div>
         
         <div class="input-group">
-          <label for="customerName">Customer Name</label>
+          <label for="customerName">Name</label>
           <input type="text" id="customerName" required placeholder="Enter customer full name">
         </div>
 
         <div class="input-group">
-          <label for="phoneNumber">Phone Number</label>
+          <label for="phoneNumber">Phone</label>
           <input type="tel" id="phoneNumber" required placeholder="98XXXXXXXX" pattern="[0-9]{10}">
           <span class="hint">Please enter a valid 10-digit mobile number</span>
         </div>
@@ -1836,18 +2059,25 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
           <h2>Payment &amp; Delivery</h2>
         </div>
 
-        <div class="input-group">
-          <label for="totalPrice">Total Price (NPR)</label>
-          <input type="number" id="totalPrice" required min="0" value="0" placeholder="0" inputmode="numeric">
+        <div class="bal" id="balPanel" aria-live="polite">
+          <span class="bal-k" id="balLabel">Balance due</span>
+          <span class="bal-v" id="balValue">NPR 0</span>
+          <div class="bal-bar"><i id="balBar"></i></div>
+          <div class="bal-sub"><span id="balPaidTxt">Advance NPR 0</span><span id="balTotTxt">of NPR 0</span></div>
         </div>
 
         <div class="input-group">
-          <label for="advance">Advance Paid (NPR)</label>
+          <label for="totalPrice">Total price</label>
+          <input type="number" id="totalPrice" required min="0" value="0" placeholder="0" inputmode="numeric" enterkeyhint="next">
+        </div>
+
+        <div class="input-group">
+          <label for="advance">Advance paid</label>
           <input type="number" id="advance" required min="0" value="0" placeholder="0">
         </div>
 
         <div class="input-group">
-          <label for="deliveryDate">Delivery Promise Date</label>
+          <label for="deliveryDate">Delivery date</label>
           <input type="text" id="deliveryDate" required readonly placeholder="Select delivery date (BS)" autocomplete="off" onclick="openCalendarPopup('deliveryDate')" style="cursor:pointer;">
         </div>
       </div>
@@ -2054,6 +2284,7 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
         <div class="total-tag">
           <span class="label">Total</span>
           <span class="value" id="footerTotal">NPR 0</span>
+          <span class="due" id="footerDue"></span>
         </div>
         <button type="submit" id="footerBtn" form="orderForm">Submit Order</button>
       </div>
@@ -3444,8 +3675,9 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
         </div>
       </div>
       <div class="item-block-body">
+        <div class="ib-rows">
         <div class="input-group">
-          <label>Item Type</label>
+          <label>Piece</label>
           <select class="itemTypeSelect customPickerSelect" data-field="itemType" data-id="${id}" data-picker-title="Select Item Type" data-placeholder="Select item" tabindex="-1" aria-hidden="true" required>
             <option value="">Select item</option>
             <option>Pant</option>
@@ -3459,7 +3691,7 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
         </div>
 
         <div class="input-group">
-          <label>Fabric Type</label>
+          <label>Fabric</label>
           <select class="fabricSelect customPickerSelect" data-field="fabricType" data-id="${id}" data-picker-title="Select Fabric Type" data-placeholder="Select fabric" tabindex="-1" aria-hidden="true">
             <option value="">Select fabric</option>
             <option>Cotton</option>
@@ -3473,13 +3705,14 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
         </div>
 
         <div class="input-group">
-          <label>Color / Design</label>
+          <label>Colour</label>
           <input type="text" class="colorInput" data-field="colorDesign" data-id="${id}" placeholder="e.g. Navy Pinstripe">
+        </div>
         </div>
 
         <div class="measureContainer" data-id="${id}">
-          <label>Measurements</label>
-          <div class="hint">Select an item type above to see matching measurement fields</div>
+          <div class="mx-head"><span class="mx-title">Measurements</span></div>
+          <div class="mx-empty">Choose the piece above and its measurement fields appear here.</div>
         </div>
 
         <div class="input-group">
@@ -3530,12 +3763,13 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
     const fields = measurementFields[itemType] || [];
 
     if (!itemType) {
-      container.innerHTML = '<label>Measurements</label><div class="hint">Select an item type above to see matching measurement fields</div>';
+      container.innerHTML = '<div class="mx-head"><span class="mx-title">Measurements</span></div><div class="mx-empty">Choose the piece above and its measurement fields appear here.</div>';
       return;
     }
 
     if (fields.length === 0) {
       container.innerHTML = `
+        <div class="mx-head"><span class="mx-title">Measurements</span></div>
         <div class="input-group">
           <label>Custom Measurements</label>
           <input type="text" class="measureFreeText" data-id="${id}" placeholder="e.g. Neck 15, Chest 42, Sleeve 25">
@@ -3544,12 +3778,12 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
       return;
     }
 
-    let html = '<label style="margin-bottom:8px;">Measurements (inches)</label><div class="measure-grid">';
+    let html = '<div class="mx-head"><span class="mx-title">Measurements</span><span class="mx-count" data-total="' + fields.length + '">0 of ' + fields.length + ' taken</span></div><div class="mx-tape"><i></i></div><div class="measure-grid">';
     for (let i = 0; i < fields.length; i++) {
       html += `
         <div class="measure-input-container">
           <label>${fields[i]}</label>
-          <input type="number" step="0.1" class="measure-input" data-field="${fields[i]}" data-id="${id}" placeholder="0.0">
+          <input type="number" step="any" inputmode="decimal" enterkeyhint="next" class="measure-input" data-field="${fields[i]}" data-id="${id}" placeholder="0.0">
         </div>
       `;
     }
@@ -4849,24 +5083,24 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
     appConfirm('Are you sure you want to delete this order? This cannot be undone.', { danger: true, okText: 'Delete' }).then(function (confirmed) {
       if (!confirmed) return;
 
-      if (renderedHistoryIsOffline) {
-        let history = getLocalHistory();
-        history.splice(index, 1);
-        try {
-          localStorage.setItem('sardar_tailoring_orders', JSON.stringify(history));
-        } catch (e) {
-          console.error(e);
-        }
-        renderHistoryList();
-        updateHistoryBadge();
-        return;
-      }
-
       const order = renderedHistory[index];
       if (!order) return;
+      const tid = String(order.ticketId);
 
       const cardEl = listContainerCardAt(index);
       if (cardEl) cardEl.style.opacity = '0.5';
+
+      // Remove this ticket from EVERY place it is stored on the device
+      // (by ticket id, never by list position).
+      function purgeLocal() {
+        const drop = function (list) { return Array.isArray(list) ? list.filter(function (o) { return !(o && String(o.ticketId) === tid); }) : list; };
+        allHistoryOrders = drop(allHistoryOrders);
+        _sheetMemory = drop(_sheetMemory);
+        try { localStorage.setItem(SHEET_CACHE_KEY, JSON.stringify(drop(getCachedSheetHistory()))); } catch (e) {}
+        try { localStorage.setItem('sardar_tailoring_orders', JSON.stringify(drop(getLocalHistory()))); } catch (e) {}
+        filterHistoryList();
+        updateHistoryBadge();
+      }
 
       fetch(GOOGLE_SHEETS_API_URL, {
         method: 'POST',
@@ -4878,29 +5112,25 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
           return res.json();
         })
         .then(function (result) {
-          // Only treat as deleted if the sheet really confirmed it.
-          if (!result || result.ok !== true) {
-            throw new Error((result && result.error) || 'Google Sheets did not confirm the delete');
+          const msg = String((result && result.error) || '');
+          // "Ticket not found" = the sheet never had it (or it is already gone),
+          // so the order only existed on this device: just remove it here.
+          if (!result || (result.ok !== true && !/not found/i.test(msg))) {
+            throw new Error(msg || 'Google Sheets did not confirm the delete');
           }
-          // Remove the order from EVERY place it is cached, otherwise it
-          // reappears from memory / local storage right after deleting.
-          const tid = String(order.ticketId);
-          const drop = function (list) { return Array.isArray(list) ? list.filter(function (o) { return !(o && String(o.ticketId) === tid); }) : list; };
-          allHistoryOrders = drop(allHistoryOrders);
-          _sheetMemory = drop(_sheetMemory);
-          try { localStorage.setItem(SHEET_CACHE_KEY, JSON.stringify(drop(getCachedSheetHistory()))); } catch (e) {}
-          try { localStorage.setItem('sardar_tailoring_orders', JSON.stringify(drop(getLocalHistory()))); } catch (e) {}
-          filterHistoryList();
-          updateHistoryBadge();
-          // Re-sync from the sheet in the background to confirm.
+          purgeLocal();
           fetchOrdersFromSheet(true).then(function (fresh) {
-            allHistoryOrders = fresh;
+            // keep it gone even if a stale copy comes back
+            allHistoryOrders = fresh.filter(function (o) { return String(o.ticketId) !== tid; });
             filterHistoryList();
             updateHistoryBadge();
           }).catch(function () {});
         })
         .catch(function (err) {
           console.error(err);
+          // No connection: if this order was never synced to the sheet it is
+          // safe to delete from the device right away.
+          if (!order.onlineSubmitted) { purgeLocal(); return; }
           appAlert('Could not delete this order: ' + (err && err.message ? err.message : 'check your internet connection and try again.'));
           if (cardEl) cardEl.style.opacity = '1';
         });
@@ -6456,6 +6686,49 @@ new MutationObserver(move).observe(nav,{subtree:true,attributes:true,attributeFi
 addEventListener('resize',move);addEventListener('load',move);setTimeout(move,400);setTimeout(move,1500);
 if(window.ResizeObserver){var ro=new ResizeObserver(move);ro.observe(nav);nav.querySelectorAll('.tab-btn').forEach(function(x){ro.observe(x)})}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(move)})();
+</script>
+
+<script>
+/* Order ticket: live balance due + measurement progress (display only) */
+(function () {
+  var last = '';
+  function fmt(n) { return 'NPR ' + n.toLocaleString('en-IN'); }
+  function tick() {
+    var tEl = document.getElementById('totalPrice'), aEl = document.getElementById('advance');
+    if (tEl && aEl) {
+      var total = Number(tEl.value) || 0, adv = Number(aEl.value) || 0;
+      var due = total - adv, key = total + '|' + adv;
+      if (key !== last) {
+        last = key;
+        var panel = document.getElementById('balPanel'), dueEl = document.getElementById('footerDue');
+        var state = adv > total ? 'over' : (total > 0 && due === 0 ? 'ok' : '');
+        var label = state === 'over' ? 'Advance exceeds total' : (state === 'ok' ? 'Paid in full' : 'Balance due');
+        var big = state === 'over' ? fmt(adv - total) : fmt(Math.max(due, 0));
+        panel.className = 'bal' + (state ? ' ' + state : '');
+        document.getElementById('balLabel').textContent = label;
+        document.getElementById('balValue').textContent = big;
+        document.getElementById('balBar').style.width = (total > 0 ? Math.min(100, Math.round(adv / total * 100)) : 0) + '%';
+        document.getElementById('balPaidTxt').textContent = 'Advance ' + fmt(adv);
+        document.getElementById('balTotTxt').textContent = 'of ' + fmt(total);
+        dueEl.className = 'due' + (state ? ' ' + state : '');
+        dueEl.textContent = total === 0 ? '' : (state === 'over' ? 'Advance exceeds total' : (state === 'ok' ? 'Paid in full' : 'Balance ' + fmt(due)));
+      }
+    }
+    document.querySelectorAll('.measureContainer').forEach(function (c) {
+      var cnt = c.querySelector('.mx-count'); if (!cnt) return;
+      var all = c.querySelectorAll('.measure-input'), done = 0;
+      all.forEach(function (i) { if (i.value !== '') done++; });
+      var txt = done + ' of ' + all.length + ' taken';
+      if (cnt.textContent !== txt) {
+        cnt.textContent = txt;
+        var bar = c.querySelector('.mx-tape i'); if (bar) bar.style.width = (all.length ? Math.round(done / all.length * 100) : 0) + '%';
+      }
+    });
+  }
+  ['input', 'change', 'keyup'].forEach(function (e) { document.addEventListener(e, tick); });
+  setInterval(tick, 500);
+  tick();
+})();
 </script>
 </body>
 </html>
