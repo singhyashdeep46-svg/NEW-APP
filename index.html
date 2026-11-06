@@ -4877,13 +4877,31 @@ input:focus,textarea:focus,.custom-select-trigger:focus-visible,.custom-select-t
           if (!res.ok) throw new Error('Network error: ' + res.status);
           return res.json();
         })
-        .then(function () {
-          renderHistoryList();
+        .then(function (result) {
+          // Only treat as deleted if the sheet really confirmed it.
+          if (!result || result.ok !== true) {
+            throw new Error((result && result.error) || 'Google Sheets did not confirm the delete');
+          }
+          // Remove the order from EVERY place it is cached, otherwise it
+          // reappears from memory / local storage right after deleting.
+          const tid = String(order.ticketId);
+          const drop = function (list) { return Array.isArray(list) ? list.filter(function (o) { return !(o && String(o.ticketId) === tid); }) : list; };
+          allHistoryOrders = drop(allHistoryOrders);
+          _sheetMemory = drop(_sheetMemory);
+          try { localStorage.setItem(SHEET_CACHE_KEY, JSON.stringify(drop(getCachedSheetHistory()))); } catch (e) {}
+          try { localStorage.setItem('sardar_tailoring_orders', JSON.stringify(drop(getLocalHistory()))); } catch (e) {}
+          filterHistoryList();
           updateHistoryBadge();
+          // Re-sync from the sheet in the background to confirm.
+          fetchOrdersFromSheet(true).then(function (fresh) {
+            allHistoryOrders = fresh;
+            filterHistoryList();
+            updateHistoryBadge();
+          }).catch(function () {});
         })
         .catch(function (err) {
           console.error(err);
-          appAlert('Could not delete this order right now. Check your internet connection and try again.');
+          appAlert('Could not delete this order: ' + (err && err.message ? err.message : 'check your internet connection and try again.'));
           if (cardEl) cardEl.style.opacity = '1';
         });
     });
