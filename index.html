@@ -1929,6 +1929,16 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
 @media (prefers-reduced-motion: reduce) {
   #orderForm *, .summary-bar * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Date picker: Nepali (BS) big, English (AD) small — same as the dashboard calendar */
+.calendar-weekday-row span { display: flex; flex-direction: column; align-items: center; line-height: 1.15; }
+.calendar-weekday-row span small { font-size: 10px; font-weight: 500; opacity: .6; letter-spacing: .02em; }
+.calendar-day-grid { gap: 4px 2px; }
+.calendar-day-btn { aspect-ratio: auto; min-height: 52px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.calendar-day-btn.empty { min-height: 52px; }
+.calendar-day-btn .bsn { font-size: 17px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.calendar-day-btn .adn { font-size: 10px; font-weight: 500; opacity: .6; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.calendar-day-btn.selected .adn { opacity: .85; }
 </style>
 
 </head>
@@ -2442,7 +2452,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       </button>
     </div>
     <div class="calendar-weekday-row">
-      <span>आइत</span><span>सोम</span><span>मंगल</span><span>बुध</span><span>बिहि</span><span>शुक्र</span><span class="sat">शनि</span>
+      <span>आइत<small>Sun</small></span><span>सोम<small>Mon</small></span><span>मंगल<small>Tue</small></span><span>बुध<small>Wed</small></span><span>बिहि<small>Thu</small></span><span>शुक्र<small>Fri</small></span><span class="sat">शनि<small>Sat</small></span>
     </div>
     <div class="calendar-day-grid" id="calendarDayGrid"></div>
     <div class="calendar-popup-footer">
@@ -2804,7 +2814,10 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       if (dayISO === todayISO) classes.push('today');
       if (dayISO === selectedISO) classes.push('selected');
       if ((firstWeekday + d - 1) % 7 === 6) classes.push('sat');
-      html += '<button type="button" class="' + classes.join(' ') + '" onclick="selectCalendarDay(' + d + ')">' + d + '</button>';
+      const adD = bsToAd(calendarViewYear, calendarViewMonth, d);
+      const adTxt = adD.getDate() === 1 ? AD_MONTH_SHORT[adD.getMonth()] + ' 1' : String(adD.getDate());
+      html += '<button type="button" class="' + classes.join(' ') + '" onclick="selectCalendarDay(' + d + ')" aria-label="' + d + ' ' + BS_MONTHS[calendarViewMonth] + ', ' + AD_MONTH_SHORT[adD.getMonth()] + ' ' + adD.getDate() + '">' +
+        '<span class="bsn">' + d + '</span><span class="adn">' + adTxt + '</span></button>';
     }
     grid.innerHTML = html;
   }
