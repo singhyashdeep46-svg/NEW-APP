@@ -1950,6 +1950,11 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
 .sal-syncrow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
 .sal-syncrow .sal-sync { flex: 1; margin: 0; line-height: 1.35; }
 .sal-syncrow .sal-link { flex-shrink: 0; padding: 6px 4px; font-weight: 600; }
+
+.sal-allrow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 12px 14px; margin: 4px 0 10px; border-radius: 14px; background: var(--orange-tint); color: var(--orange-ink); font-size: 14px; font-weight: 600; }
+.sal-allrow b { font-size: 17px; font-weight: 700; }
+.sal-yearhead { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0 2px; padding-top: 8px; font-size: 13px; font-weight: 700; color: var(--label-2); text-transform: uppercase; letter-spacing: .05em; border-top: .5px solid var(--sep); }
+.sal-yearhead b { color: var(--orange-ink); letter-spacing: 0; }
 </style>
 
 </head>
@@ -2269,11 +2274,12 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       </div>
       <div class="sal-summary">
         <div class="sal-stat"><span>Salary</span><b id="salTotSalary">NPR 0</b></div>
-        <div class="sal-stat adv"><span>Advance</span><b id="salTotAdvance">NPR 0</b></div>
+        <div class="sal-stat adv"><span>Advance &middot; this month</span><b id="salTotAdvance">NPR 0</b></div>
         <div class="sal-stat net"><span>To Pay</span><b id="salTotNet">NPR 0</b></div>
         <div class="sal-stat"><span>Paid</span><b id="salPaidProg">0 / 0</b></div>
       </div>
       <div id="salList"></div>
+      <div class="sal-card" id="salAdvHistory"></div>
       <div class="sal-card" id="salPayHistory"></div>
       <div class="sal-card" id="salAddStaffCard">
         <div class="sal-name" style="margin-bottom:10px;">Add Staff Member</div>
@@ -2848,6 +2854,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   let salOpenPay = null;                          // staff id with payment form open
   let salOpenAtt = null;                          // staff id with attendance grid open
   let salNewType = 'monthly';
+  let salAdvKeepIso = null;                       // last advance date, kept so many can be added quickly
 
   // Normalise a saved copy. Old "Mark Paid" flags become payment entries
   // (same id on every phone, so they never duplicate).
@@ -2952,9 +2959,25 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     if (pg && pg.style.display !== 'none' && !salOpenForm && !salOpenPay && !typing) salRender();
     if (window.salRenderDashCard) window.salRenderDashCard();
   }
+  // Merge what the sheet returned into this phone. Returns true if this phone
+  // still has something the sheet does not (needs another push).
+  function salApply(resData, resUpdated) {
+    const remote = salNorm(resData); remote.updatedAt = Number(resUpdated) || 0;
+    const before = salSig(salData);
+    salData = salMerge(salData, remote);
+    try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
+    const now = salSig(salData);
+    if (now !== before) salRenderSafe();
+    return now !== salSig(remote);
+  }
+  function salOk() {
+    const t = new Date();
+    salSetStatus('ok', 'Synced ' + t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' - ' + salData.staff.length + ' staff. Every phone sees the same data.');
+  }
+  let salAgainN = 0;
   function salSync() {
     if (salSyncBusy) { salSyncAgain = true; return Promise.resolve(); }
-    salSyncBusy = true; salSetStatus('busy', 'Syncing with Google Sheet...');
+    salSyncBusy = true; salSetStatus('busy', 'Syncing...');
     const post = function (body) {
       const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
       const to = setTimeout(function () { if (ac) ac.abort(); }, 30000);
@@ -2967,38 +2990,36 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       if (/ticketid/i.test(m)) return 'Your Google script is the OLD version. Paste the new Code.gs, then Deploy > Manage deployments > pencil > New version > Deploy.';
       return m || 'Salary script not set up';
     };
-    return post({ action: 'salaryLoad' }).then(function (res) {
+    const full = function () { return { updatedAt: salData.updatedAt, data: salData, rows: salBuildReport(), payRows: salBuildPayRows(), staffName: currentStaffName || '' }; };
+    return post(Object.assign({ action: 'salarySync' }, full())).then(function (res) {
+      if (res && !res.ok && /ticketid/i.test(String(res.error || ''))) {
+        // older script: do it in two steps (load, then save)
+        return post({ action: 'salaryLoad' }).then(function (r1) {
+          if (!r1 || !r1.ok) throw new Error(bad(r1));
+          const push = salApply(r1.data, r1.updatedAt) || !r1.data;
+          if (!push || (!salData.staff.length && !salData.del.length)) return null;
+          salData.updatedAt = Date.now();
+          try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
+          return post(Object.assign({ action: 'salarySave' }, full())).then(function (r2) { if (!r2 || !r2.ok) throw new Error(bad(r2)); });
+        }).then(salOk);
+      }
       if (!res || !res.ok) throw new Error(bad(res));
-      const remote = salNorm(res.data); remote.updatedAt = Number(res.updatedAt) || 0;
-      const before = salSig(salData);
-      const merged = res.data ? salMerge(salData, remote) : salNorm(salData);
-      const changed = salSig(merged) !== before;
-      const needPush = !res.data || salSig(merged) !== salSig(remote);
-      salData = merged;
-      if (needPush) salData.updatedAt = Date.now();
-      try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
-      if (changed) salRenderSafe();
-      if (!needPush || (!salData.staff.length && !salData.del.length)) return null;
-      return post({ action: 'salarySave', updatedAt: salData.updatedAt, data: salData, rows: salBuildReport(), payRows: salBuildPayRows(), staffName: currentStaffName || '' })
-        .then(function (r) { if (!r || !r.ok) throw new Error(bad(r)); });
-    }).then(function () {
-        const t = new Date();
-        salSetStatus('ok', 'Synced ' + t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + salData.staff.length + ' staff on the sheet. Every phone sees the same data.');
-      })
-      .catch(function (e) {
+      if (salApply(res.data, res.updatedAt) && salAgainN < 3) { salSyncAgain = true; salAgainN++; } else salAgainN = 0;
+      salOk();
+    }).catch(function (e) {
         const m = e && e.name === 'AbortError' ? 'Google is too slow right now - tap Sync now to retry' : (e && e.message ? e.message : 'offline');
         salSetStatus('err', 'NOT synced - this phone only. ' + m);
       })
       .finally(function () { salSyncBusy = false; if (salSyncAgain) { salSyncAgain = false; salQueuePush(); } });
   }
-  function salQueuePush() { clearTimeout(salSyncT); salSetStatus('busy', 'Saving...'); salSyncT = setTimeout(salSync, 1200); }
+  function salQueuePush() { clearTimeout(salSyncT); salSetStatus('busy', 'Saving...'); salSyncT = setTimeout(salSync, 250); }
   function salPull() { return salSync(); }
   window.salSyncNow = function () { salSyncBusy = false; return salSync(); };
   // Quiet refresh for the dashboard (at most once every 30s)
-  window.salBgSync = function () { if (Date.now() - salLastBg < 30000) return; salLastBg = Date.now(); salSync(); };
+  window.salBgSync = function () { if (Date.now() - salLastBg < 15000) return; salLastBg = Date.now(); salSync(); };
   // While the salary page is open, keep checking for changes from other phones
   function salPageOpen() { const pg = document.getElementById('orderSalaryContainer'); return !!pg && pg.style.display !== 'none'; }
-  setInterval(function () { if (!document.hidden && salPageOpen()) salSync(); }, 20000);
+  setInterval(function () { if (!document.hidden && salPageOpen()) salSync(); }, 8000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && salPageOpen()) salSync(); });
   window.addEventListener('online', function () { if (salPageOpen()) salSync(); });
   function salId() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -3123,7 +3144,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   };
 
   window.salToggleAdvForm = function (id) {
-    salOpenForm = salOpenForm === id ? null : id; salOpenPay = null;
+    salOpenForm = salOpenForm === id ? null : id; salOpenPay = null; salAdvKeepIso = null;
     salRender();
     if (salOpenForm) { const el = document.getElementById('salAdvAmt-' + id); if (el) el.focus(); }
   };
@@ -3245,10 +3266,9 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const iso = dateEl.dataset.iso || isoOfDate(new Date());
     if (!(amount > 0)) { appAlert('Enter the advance amount.'); return; }
     salData.advances.push({ id: salId(), staffId: id, iso: iso, amount: amount, note: noteEl.value.trim(), by: currentStaffName || '' });
-    const bs = adToBs(dateOfIso(iso));
-    if (bs) { salViewYear = bs.y; salViewMonth = bs.m; }
-    salOpenForm = null;
+    salAdvKeepIso = iso;          // keep the form open + same date for the next advance
     salSave(); salRender();
+    const nx = document.getElementById('salAdvAmt-' + id); if (nx) nx.focus();
   };
 
   window.salDeleteAdvance = function (advId) {
@@ -3329,6 +3349,8 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         return '<div class="sal-adv-item pay"><span>' + salNpr(x.amount) + '<small>' + salEsc(formatDateHuman(x.iso)) + (x.note ? ' &middot; ' + salEsc(x.note) : '') + (x.by ? ' &middot; ' + salEsc(x.by) : '') + '</small></span>' +
           '<button type="button" class="sal-x" onclick="salDeletePayment(\'' + x.id + '\')" aria-label="Delete payment">&times;</button></div>';
       }).join('') : '<div class="sal-sub">No payment made this month.</div>';
+      const allAdv = salData.advances.filter(function (x) { return x.staffId === st.id; });
+      const allAdvTotal = allAdv.reduce(function (t, x) { return t + (Number(x.amount) || 0); }, 0);
       const payOpen = salOpenPay === st.id;
       const formOpen = salOpenForm === st.id, attOpen = salOpenAtt === st.id;
       const cur = salCurrentBs(), isNow = cur.y === salViewYear && cur.m === salViewMonth;
@@ -3357,6 +3379,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
           (c.paidTotal ? '<div class="sal-row pos"><span>Paid so far</span><b>- ' + salNpr(c.paidTotal) + '</b></div>' : '') +
           '<div class="sal-row net"><span>' + (c.remaining < 0 ? (c.paidTotal ? 'Paid extra' : 'Over-advanced') : (c.paidTotal && c.remaining === 0 ? 'Fully paid' : 'Still to pay')) + '</span><b style="color:' + (c.remaining < 0 ? 'var(--red-ink)' : (c.paidTotal && c.remaining === 0 ? 'var(--green-ink)' : 'inherit')) + '">' + salNpr(Math.abs(c.remaining)) + '</b></div>' +
         '</div><div class="sal-adv-list">' + advHtml + '</div></div>' +
+        '<div class="sal-allrow"><span>All advances, every date (' + allAdv.length + ')</span><b>' + salNpr(allAdvTotal) + '</b></div>' +
         '<div class="sal-block"><div class="sal-block-head"><span>Payment history</span></div><div class="sal-adv-list">' + payHtml + '</div></div>' +
         '<div class="sal-form' + (formOpen ? ' open' : '') + '">' +
           '<div class="input-group"><label for="salAdvAmt-' + st.id + '">Advance Amount (NPR)</label><input type="number" id="salAdvAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0"></div>' +
@@ -3384,13 +3407,37 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     document.getElementById('salTotNet').textContent = salNpr(totRem);
     if (salOpenForm) {
       const d = document.getElementById('salAdvDate-' + salOpenForm);
-      if (d && !d.dataset.iso) setFieldISO(d.id, isoOfDate(new Date()));
+      if (d && !d.dataset.iso) setFieldISO(d.id, salAdvKeepIso || isoOfDate(new Date()));
     }
     if (salOpenPay) {
       const d = document.getElementById('salPayDate-' + salOpenPay);
       if (d && !d.dataset.iso) setFieldISO(d.id, isoOfDate(new Date()));
     }
+    salRenderAdvHistory();
     salRenderPayHistory();
+  }
+
+  // Every advance ever given: all staff, all dates and years, with totals
+  function salRenderAdvHistory() {
+    const host = document.getElementById('salAdvHistory');
+    if (!host) return;
+    const nm = function (id) { const st = salData.staff.find(function (x) { return x.id === id; }); return st ? st.name : 'Removed staff'; };
+    const list = salData.advances.slice().sort(function (x, y) { return x.iso < y.iso ? 1 : x.iso > y.iso ? -1 : 0; });
+    let total = 0; const per = {};
+    list.forEach(function (x) { const a = Number(x.amount) || 0; total += a; per[x.staffId] = (per[x.staffId] || 0) + a; });
+    let h = '<div class="sal-name" style="margin-bottom:4px;">All Advances</div><div class="sal-sub" style="margin-bottom:8px;">' + list.length + ' advance' + (list.length === 1 ? '' : 's') + ' &middot; <b>' + salNpr(total) + '</b> in total, all dates</div>';
+    const ids = Object.keys(per);
+    if (ids.length) h += '<div class="sal-chips" style="margin-bottom:6px;">' + ids.map(function (id) { return '<span class="chip a">' + salEsc(nm(id)) + ' <b>' + salNpr(per[id]) + '</b></span>'; }).join('') + '</div>';
+    if (!list.length) h += '<div class="sal-sub">No advance given yet.</div>';
+    let curYear = null, yearTotal = {};
+    list.forEach(function (x) { const bs = adToBs(dateOfIso(x.iso)); const y = bs ? bs.y : '-'; yearTotal[y] = (yearTotal[y] || 0) + (Number(x.amount) || 0); });
+    list.forEach(function (x) {
+      const bs = adToBs(dateOfIso(x.iso)), y = bs ? bs.y : '-';
+      if (y !== curYear) { curYear = y; h += '<div class="sal-yearhead"><span>' + y + ' BS</span><b>' + salNpr(yearTotal[y]) + '</b></div>'; }
+      h += '<div class="sal-adv-item"><span>' + salEsc(nm(x.staffId)) + ' &middot; ' + salNpr(x.amount) + '<small>' + salEsc(formatDateHuman(x.iso)) + (x.note ? ' &middot; ' + salEsc(x.note) : '') + (x.by ? ' &middot; ' + salEsc(x.by) : '') + '</small></span>' +
+        '<button type="button" class="sal-x" onclick="salDeleteAdvance(\'' + x.id + '\')" aria-label="Delete advance">&times;</button></div>';
+    });
+    host.innerHTML = h;
   }
 
   // All payments, newest first, every month
