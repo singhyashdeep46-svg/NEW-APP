@@ -1140,6 +1140,7 @@ html.dark-mode .tab-switcher { border-color: rgba(255, 255, 255, 0.12); }
 .cal-detail h4{font-size:15px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cal-busy{font-size:12px;font-weight:600;color:var(--red-ink);background:var(--red-tint);padding:2px 9px;border-radius:999px}
 .cal-o{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--field);border-radius:12px;margin-bottom:6px}
+.cal-o{cursor:pointer}.cal-o:active{transform:scale(.98)}
 .cal-o b{font-size:15px;font-weight:600}.cal-o small{display:block;font-size:12px;color:var(--label-2)}
 .cal-o em{font-style:normal;font-size:12px;font-weight:600;color:var(--green-ink);background:var(--green-tint);padding:2px 9px;border-radius:999px}
 .cal-empty{font-size:14px;color:var(--label-2);padding:6px 2px}
@@ -2335,6 +2336,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm4 15h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0 -2m0 -4h-8a1 1 0 0 0 0 2h8a1 1 0 0 0 0 -2m-7 -7h-1a1 1 0 1 0 0 2h1a1 1 0 1 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>
       Print / Save as PDF
     </button>
+    <button type="button" id="modalMarkDeliveredBtn" class="modal-action-btn-secondary" style="display:none;width:100%;margin-bottom:8px" onclick="markDeliveredFromModal()">Mark Delivered</button>
     <div class="modal-action-row">
       <button type="button" class="modal-action-btn-secondary" onclick="editFromModal()">
         <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg>
@@ -2852,6 +2854,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   let salViewYear = null, salViewMonth = null;   // BS month being viewed
   let salOpenForm = null;                         // staff id with advance form open
   let salOpenPay = null;                          // staff id with payment form open
+  let salOpenAllAdv = null;                       // staff id with all-advances list open
   let salOpenAtt = null;                          // staff id with attendance grid open
   let salNewType = 'monthly';
   let salAdvKeepIso = null;                       // last advance date, kept so many can be added quickly
@@ -3149,6 +3152,8 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     if (salOpenForm) { const el = document.getElementById('salAdvAmt-' + id); if (el) el.focus(); }
   };
 
+  window.salToggleAllAdv = function (id) { salOpenAllAdv = salOpenAllAdv === id ? null : id; salRender(); };
+
   window.salToggleAtt = function (id) {
     salOpenAtt = salOpenAtt === id ? null : id;
     salRender();
@@ -3211,10 +3216,17 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     } else L.push('Salary: ' + salNpr(c.earned));
     if (c.advs.length) {
       L.push('');
-      L.push('Advances:');
+      L.push('Advances this month:');
       c.advs.forEach(function (a) { L.push('- ' + formatDateHuman(a.iso) + ': ' + salNpr(a.amount) + (a.note ? ' (' + a.note + ')' : '')); });
     }
-    L.push('Total advance: ' + salNpr(c.advTotal));
+    L.push('Total advance this month: ' + salNpr(c.advTotal));
+    const allA = salData.advances.filter(function (x) { return x.staffId === st.id; }).sort(function (a, b) { return String(a.iso) < String(b.iso) ? -1 : 1; });
+    if (allA.length) {
+      L.push('');
+      L.push('All advances given (' + allA.length + '):');
+      allA.forEach(function (a) { L.push('- ' + formatDateHuman(a.iso) + ': ' + salNpr(a.amount) + (a.note ? ' (' + a.note + ')' : '')); });
+      L.push('Total of all advances: ' + salNpr(allA.reduce(function (t, x) { return t + (Number(x.amount) || 0); }, 0)));
+    }
     L.push('');
     L.push((c.net < 0 ? 'Over-advanced: ' : 'Payable: ') + salNpr(Math.abs(c.net)));
     if (c.pays.length) {
@@ -3344,13 +3356,15 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       const advHtml = c.advs.length ? c.advs.map(function (a) {
         return '<div class="sal-adv-item"><span>' + salNpr(a.amount) + '<small>' + salEsc(formatDateHuman(a.iso)) + (a.note ? ' &middot; ' + salEsc(a.note) : '') + '</small></span>' +
           '<button type="button" class="sal-x" onclick="salDeleteAdvance(\'' + a.id + '\')" aria-label="Delete advance">&times;</button></div>';
-      }).join('') : '<div class="sal-sub">No advance taken this month.</div>';
+      }).join('') : '<div class="sal-sub">No advance this month. Tap "All advances" below to see earlier ones.</div>';
       const payHtml = c.pays.length ? c.pays.map(function (x) {
         return '<div class="sal-adv-item pay"><span>' + salNpr(x.amount) + '<small>' + salEsc(formatDateHuman(x.iso)) + (x.note ? ' &middot; ' + salEsc(x.note) : '') + (x.by ? ' &middot; ' + salEsc(x.by) : '') + '</small></span>' +
           '<button type="button" class="sal-x" onclick="salDeletePayment(\'' + x.id + '\')" aria-label="Delete payment">&times;</button></div>';
       }).join('') : '<div class="sal-sub">No payment made this month.</div>';
       const allAdv = salData.advances.filter(function (x) { return x.staffId === st.id; });
       const allAdvTotal = allAdv.reduce(function (t, x) { return t + (Number(x.amount) || 0); }, 0);
+      const allOpen = salOpenAllAdv === st.id;
+      const allAdvSorted = allAdv.slice().sort(function (a, b) { return String(a.iso) < String(b.iso) ? 1 : -1; });
       const payOpen = salOpenPay === st.id;
       const formOpen = salOpenForm === st.id, attOpen = salOpenAtt === st.id;
       const cur = salCurrentBs(), isNow = cur.y === salViewYear && cur.m === salViewMonth;
@@ -3379,7 +3393,11 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
           (c.paidTotal ? '<div class="sal-row pos"><span>Paid so far</span><b>- ' + salNpr(c.paidTotal) + '</b></div>' : '') +
           '<div class="sal-row net"><span>' + (c.remaining < 0 ? (c.paidTotal ? 'Paid extra' : 'Over-advanced') : (c.paidTotal && c.remaining === 0 ? 'Fully paid' : 'Still to pay')) + '</span><b style="color:' + (c.remaining < 0 ? 'var(--red-ink)' : (c.paidTotal && c.remaining === 0 ? 'var(--green-ink)' : 'inherit')) + '">' + salNpr(Math.abs(c.remaining)) + '</b></div>' +
         '</div><div class="sal-adv-list">' + advHtml + '</div></div>' +
-        '<div class="sal-allrow"><span>All advances, every date (' + allAdv.length + ')</span><b>' + salNpr(allAdvTotal) + '</b></div>' +
+        '<button type="button" class="sal-allrow" style="width:100%;border:0;font:inherit;cursor:pointer;text-align:left" aria-expanded="' + (allOpen ? 'true' : 'false') + '" onclick="salToggleAllAdv(\'' + st.id + '\')"><span>All advances, every date (' + allAdv.length + ') ' + (allOpen ? '&#9652;' : '&#9662;') + '</span><b>' + salNpr(allAdvTotal) + '</b></button>' +
+        (allOpen ? '<div class="sal-adv-list" style="margin-bottom:10px">' + (allAdvSorted.length ? allAdvSorted.map(function (a) {
+          return '<div class="sal-adv-item"><span>' + salNpr(a.amount) + '<small>' + salEsc(formatDateHuman(a.iso)) + (a.note ? ' &middot; ' + salEsc(a.note) : '') + (a.by ? ' &middot; ' + salEsc(a.by) : '') + '</small></span>' +
+            '<button type="button" class="sal-x" onclick="salDeleteAdvance(\'' + a.id + '\')" aria-label="Delete advance">&times;</button></div>';
+        }).join('') : '<div class="sal-sub">No advances yet.</div>') + '</div>' : '') +
         '<div class="sal-block"><div class="sal-block-head"><span>Payment history</span></div><div class="sal-adv-list">' + payHtml + '</div></div>' +
         '<div class="sal-form' + (formOpen ? ' open' : '') + '">' +
           '<div class="input-group"><label for="salAdvAmt-' + st.id + '">Advance Amount (NPR)</label><input type="number" id="salAdvAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0"></div>' +
@@ -4710,6 +4728,31 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  window.markDeliveredFromModal = function () {
+    const order = renderedHistory[currentModalIndex];
+    if (!order || order.delivered) return;
+    appConfirm('Mark this order as Delivered?').then(function (ok) {
+      if (!ok) return;
+      const when = todayFormatted();
+      changeOrderStatus(order, { delivered: true }, { deliveredAt: when });
+      Object.assign(order, { delivered: true, deliveredAt: when });
+      closeReceiptModal();
+      try { if (typeof renderDashboard === 'function') renderDashboard(); } catch (e) {}
+      try { if (window.renderDeliveryCalendar) window.renderDeliveryCalendar(); } catch (e) {}
+    });
+  };
+  (function () {
+    const m = document.getElementById('receiptModal');
+    if (!m) return;
+    const sync = function () {
+      const b = document.getElementById('modalMarkDeliveredBtn');
+      if (!b || !m.classList.contains('show')) return;
+      const o = renderedHistory[currentModalIndex];
+      b.style.display = o && !o.delivered ? '' : 'none';
+    };
+    new MutationObserver(sync).observe(m, { attributes: true, attributeFilter: ['class'] });
+  })();
+
   window.editFromModal = function () {
     if (currentModalIndex == null) return;
     editHistoryTicket(currentModalIndex);
@@ -5778,8 +5821,9 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         : '<button type="button" class="' + cls + '" ' + on + '><span class="wl">' + calFmt(d, { weekday: 'short' }) + ' ' + bd.d + ' ' + bd.m + '<small>' + calFmt(d) + '</small></span><span class="bar"><i style="width:' + Math.min(100, n / CAL_BUSY * 100) + '%"></i></span><span class="c">' + n + '</span></button>';
     });
     const sg = g[calKey(s.sel)] || { p: [], d: [] }, sb = calBs(s.sel);
-    const rows = sg.p.concat(sg.d).map(function (o) {
-      return '<div class="cal-o"><div><b>' + escapeHtml(o.customerName) + '</b><small>' + escapeHtml(o.ticketId || '') + ' &middot; ' + (o.itemTypes || []).length + ' pc</small></div>' + (o.delivered ? '<em>Delivered</em>' : '') + '</div>';
+    calDetailOrders = sg.p.concat(sg.d);
+    const rows = calDetailOrders.map(function (o, i) {
+      return '<div class="cal-o" role="button" tabindex="0" onclick="calOpenOrder(' + i + ')"><div><b>' + escapeHtml(o.customerName) + '</b><small>' + escapeHtml(o.ticketId || '') + ' &middot; ' + (o.itemTypes || []).length + ' pc</small></div>' + (o.delivered ? '<em>Delivered</em>' : '') + '</div>';
     }).join('');
     const bz = busiest ? calBs(busiest) : null;
     const sum = total ? total + ' due' + (max >= CAL_BUSY ? ' &middot; <strong>Busiest ' + bz.d + ' ' + bz.m + ' (' + max + ')</strong>' : '') : 'Nothing due in this period';
@@ -5791,6 +5835,16 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       '<div class="cal-legend"><b>Big</b> = Nepali date &middot; <span>small</span> = English date</div>' +
       '<div class="cal-detail"><h4>' + calFmt(s.sel, { weekday: 'long' }) + ' &middot; ' + sb.d + ' ' + sb.m + ' ' + sb.y + ' <span style="font-weight:500;color:var(--label-2)">(' + calFmt(s.sel, { day: 'numeric', month: 'short', year: 'numeric' }) + ')</span> &middot; ' + sg.p.length + ' due' + (sg.p.length >= CAL_BUSY ? '<span class="cal-busy">Busy day</span>' : '') + '</h4>' + (rows || '<div class="cal-empty">No deliveries promised for this day.</div>') + '</div></div>';
     s.dir = 0;
+  };
+  let calDetailOrders = [];
+  window.calOpenOrder = function (idx) {
+    const o = calDetailOrders[idx];
+    if (!o) return;
+    renderedHistory = calDetailOrders;
+    currentModalIndex = idx;
+    document.getElementById('modalReceiptContent').innerHTML = generateReceiptHTML(o);
+    try { setWaNum('modal', o); } catch (e) {}
+    document.getElementById('receiptModal').classList.add('show');
   };
   window.calMode = function (m) { calState.mode = m; calState.dir = 0; window.renderDeliveryCalendar(); };
   window.calNav = function (dir) {
