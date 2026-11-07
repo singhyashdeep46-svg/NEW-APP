@@ -1946,6 +1946,10 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
 .sal-row.pos b { color: var(--green-ink); }
 .sal-adv-item.pay > span { color: var(--green-ink); }
 .sal-adv-item.pay > span small { color: var(--label-2); }
+
+.sal-syncrow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
+.sal-syncrow .sal-sync { flex: 1; margin: 0; line-height: 1.35; }
+.sal-syncrow .sal-link { flex-shrink: 0; padding: 6px 4px; font-weight: 600; }
 </style>
 
 </head>
@@ -2250,7 +2254,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     <div class="section-title-container" style="margin-top:4px;">
       <h2>Staff Salary &amp; Advance</h2>
     </div>
-    <div id="salSyncStatus" class="sal-sync"></div>
+    <div class="sal-syncrow"><div id="salSyncStatus" class="sal-sync"></div><button type="button" class="sal-link" onclick="salSyncNow()">Sync now</button></div>
     <div class="salpg-how">
       <b>How it works</b>
       <span>1. Mark attendance each day.</span>
@@ -2951,9 +2955,20 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   function salSync() {
     if (salSyncBusy) { salSyncAgain = true; return Promise.resolve(); }
     salSyncBusy = true; salSetStatus('busy', 'Syncing with Google Sheet...');
-    const post = function (body) { return fetch(GOOGLE_SHEETS_API_URL, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }); };
+    const post = function (body) {
+      const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const to = setTimeout(function () { if (ac) ac.abort(); }, 30000);
+      return fetch(GOOGLE_SHEETS_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), signal: ac ? ac.signal : undefined })
+        .then(function (r) { if (!r.ok) throw new Error('Server error ' + r.status); return r.json(); })
+        .finally(function () { clearTimeout(to); });
+    };
+    const bad = function (res) {
+      const m = String((res && res.error) || '');
+      if (/ticketid/i.test(m)) return 'Your Google script is the OLD version. Paste the new Code.gs, then Deploy > Manage deployments > pencil > New version > Deploy.';
+      return m || 'Salary script not set up';
+    };
     return post({ action: 'salaryLoad' }).then(function (res) {
-      if (!res || !res.ok) throw new Error((res && res.error) || 'Salary script not set up');
+      if (!res || !res.ok) throw new Error(bad(res));
       const remote = salNorm(res.data); remote.updatedAt = Number(res.updatedAt) || 0;
       const before = salSig(salData);
       const merged = res.data ? salMerge(salData, remote) : salNorm(salData);
@@ -2965,13 +2980,20 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       if (changed) salRenderSafe();
       if (!needPush || (!salData.staff.length && !salData.del.length)) return null;
       return post({ action: 'salarySave', updatedAt: salData.updatedAt, data: salData, rows: salBuildReport(), payRows: salBuildPayRows(), staffName: currentStaffName || '' })
-        .then(function (r) { if (!r || !r.ok) throw new Error((r && r.error) || 'Save failed'); });
-    }).then(function () { salSetStatus('ok', 'Synced - every phone sees the same staff & payments'); })
-      .catch(function (e) { salSetStatus('err', 'Not synced yet - saved on this phone (' + (e && e.message ? e.message : 'offline') + ')'); })
+        .then(function (r) { if (!r || !r.ok) throw new Error(bad(r)); });
+    }).then(function () {
+        const t = new Date();
+        salSetStatus('ok', 'Synced ' + t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + salData.staff.length + ' staff on the sheet. Every phone sees the same data.');
+      })
+      .catch(function (e) {
+        const m = e && e.name === 'AbortError' ? 'Google is too slow right now - tap Sync now to retry' : (e && e.message ? e.message : 'offline');
+        salSetStatus('err', 'NOT synced - this phone only. ' + m);
+      })
       .finally(function () { salSyncBusy = false; if (salSyncAgain) { salSyncAgain = false; salQueuePush(); } });
   }
   function salQueuePush() { clearTimeout(salSyncT); salSetStatus('busy', 'Saving...'); salSyncT = setTimeout(salSync, 1200); }
   function salPull() { return salSync(); }
+  window.salSyncNow = function () { salSyncBusy = false; return salSync(); };
   // Quiet refresh for the dashboard (at most once every 30s)
   window.salBgSync = function () { if (Date.now() - salLastBg < 30000) return; salLastBg = Date.now(); salSync(); };
   // While the salary page is open, keep checking for changes from other phones
