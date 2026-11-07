@@ -1939,6 +1939,13 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
 .calendar-day-btn .bsn { font-size: 17px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .calendar-day-btn .adn { font-size: 10px; font-weight: 500; opacity: .6; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .calendar-day-btn.selected .adn { opacity: .85; }
+
+/* Salary: part payments, payment history */
+.sal-pill.part { background: var(--accent-tint); color: var(--accent); }
+.sal-pill.none { background: var(--fill); color: var(--label-2); }
+.sal-row.pos b { color: var(--green-ink); }
+.sal-adv-item.pay > span { color: var(--green-ink); }
+.sal-adv-item.pay > span small { color: var(--label-2); }
 </style>
 
 </head>
@@ -2248,7 +2255,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       <b>How it works</b>
       <span>1. Mark attendance each day.</span>
       <span>2. Add an advance whenever money is given.</span>
-      <span>3. At month end: Balance = Earned &minus; Advances. Tap Mark Paid.</span>
+      <span>3. Still to pay = Earned &minus; Advances &minus; Payments. Tap Pay Wages each time you pay (part or full). Every payment is saved in Payment History.</span>
     </div>
     <div class="salpg">
       <div class="sal-monthbar">
@@ -2263,6 +2270,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         <div class="sal-stat"><span>Paid</span><b id="salPaidProg">0 / 0</b></div>
       </div>
       <div id="salList"></div>
+      <div class="sal-card" id="salPayHistory"></div>
       <div class="sal-card" id="salAddStaffCard">
         <div class="sal-name" style="margin-bottom:10px;">Add Staff Member</div>
         <div class="input-group">
@@ -2283,7 +2291,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         <button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="salAddStaff()">Add Staff</button>
       </div>
       <button type="button" class="history-card-btn-view" style="width:100%;justify-content:center;" onclick="salExportCsv()">Export Salary Sheet (CSV)</button>
-      <div class="sal-note">Salary records sync to your Google Sheet (tabs: SalaryData and Salary Report) and are also kept on this device. Export gives a CSV copy.</div>
+      <div class="sal-note">Staff, advances and payments sync to your Google Sheet (tabs: SalaryData, Salary Report, Salary Payments) so every phone sees the same data and are also kept on this device. Export gives a CSV copy.</div>
     </div>
   </div>
 
@@ -2830,19 +2838,31 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   // Advances are deducted from what is earned. Stored on this device.
   // =====================================================================
   const SAL_KEY = 'sardarStaffSalary';
-  let salData = { staff: [], advances: [], paid: {}, att: {}, dr: {}, updatedAt: 0 };
+  let salData = { staff: [], advances: [], payments: [], paid: {}, att: {}, dr: {}, del: [], updatedAt: 0 };
   let salViewYear = null, salViewMonth = null;   // BS month being viewed
   let salOpenForm = null;                         // staff id with advance form open
+  let salOpenPay = null;                          // staff id with payment form open
   let salOpenAtt = null;                          // staff id with attendance grid open
   let salNewType = 'monthly';
 
+  // Normalise a saved copy. Old "Mark Paid" flags become payment entries
+  // (same id on every phone, so they never duplicate).
+  function salNorm(p) {
+    p = p || {};
+    const d = { staff: (p.staff || []).slice(), advances: (p.advances || []).slice(), payments: (p.payments || []).slice(), paid: {},
+                att: p.att || {}, dr: p.dr || {}, del: (p.del || []).slice(), updatedAt: Number(p.updatedAt) || 0 };
+    Object.keys(p.paid || {}).forEach(function (k) {
+      const v = p.paid[k], parts = k.split('|'), id = 'lp-' + k;
+      if (d.del.indexOf(id) === -1 && !d.payments.some(function (x) { return x.id === id; })) {
+        d.payments.push({ id: id, staffId: parts[0], ym: parts[1], iso: (v && v.iso) || isoOfDate(new Date()), amount: Number(v && v.amount) || 0, note: 'Marked paid' });
+      }
+    });
+    return d;
+  }
   function salLoad() {
     try {
       const raw = localStorage.getItem(SAL_KEY);
-      if (raw) {
-        const p = JSON.parse(raw);
-        salData = { staff: p.staff || [], advances: p.advances || [], paid: p.paid || {}, att: p.att || {}, dr: p.dr || {}, updatedAt: Number(p.updatedAt) || 0 };
-      }
+      if (raw) salData = salNorm(JSON.parse(raw));
     } catch (e) {}
   }
   function salSave() {
@@ -2851,71 +2871,114 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     salQueuePush();
   }
 
-  // ---- Google Sheet sync (needs the salary handlers in Apps Script) ----
-  let salSyncT = null, salSyncBusy = false, salSyncAgain = false;
+  // ---- Google Sheet sync: every phone reads + merges + writes, so nothing is lost ----
+  let salSyncT = null, salSyncBusy = false, salSyncAgain = false, salLastBg = 0;
   function salSetStatus(kind, msg) {
     const el = document.getElementById('salSyncStatus');
     if (el) { el.className = 'sal-sync ' + kind; el.textContent = msg; }
+  }
+  function salCanon(v) {
+    if (Array.isArray(v)) return v.map(salCanon);
+    if (v && typeof v === 'object') { const o = {}; Object.keys(v).sort().forEach(function (k) { o[k] = salCanon(v[k]); }); return o; }
+    return v;
+  }
+  function salSig(d) {
+    const byId = function (x, y) { return x.id < y.id ? -1 : x.id > y.id ? 1 : 0; };
+    return JSON.stringify(salCanon({ s: d.staff.slice().sort(byId), a: d.advances.slice().sort(byId), p: d.payments.slice().sort(byId), at: d.att, dr: d.dr, del: d.del.slice().sort() }));
+  }
+  // Union of two copies; the newer copy wins a conflict; removed things stay removed.
+  function salMerge(a, b) {
+    const nb = (b.updatedAt || 0) > (a.updatedAt || 0), base = nb ? b : a, oth = nb ? a : b;
+    const del = {};
+    a.del.concat(b.del).forEach(function (x) { del[x] = 1; });
+    const union = function (k) {
+      const seen = {}, out = [];
+      base[k].concat(oth[k]).forEach(function (x) {
+        if (!x || !x.id || seen[x.id] || del[x.id] || (x.staffId && del[x.staffId])) return;
+        seen[x.id] = 1; out.push(x);
+      });
+      return out;
+    };
+    const mapUnion = function (k) {
+      const o = {};
+      Object.keys(oth[k]).forEach(function (x) { o[x] = oth[k][x]; });
+      Object.keys(base[k]).forEach(function (x) { o[x] = base[k][x]; });
+      Object.keys(o).forEach(function (x) { if (del[x.split('|')[0]]) delete o[x]; });
+      return o;
+    };
+    return { staff: union('staff'), advances: union('advances'), payments: union('payments'), paid: {},
+             att: mapUnion('att'), dr: mapUnion('dr'), del: Object.keys(del), updatedAt: Math.max(a.updatedAt || 0, b.updatedAt || 0) };
   }
   // Readable rows for the "Salary Report" tab: one per staff per month with any activity
   function salBuildReport() {
     const rows = [];
     salData.staff.forEach(function (st) {
       const keys = {};
-      [salData.att, salData.paid, salData.dr].forEach(function (o) {
+      [salData.att, salData.dr].forEach(function (o) {
         Object.keys(o).forEach(function (k) { if (k.indexOf(st.id + '|') === 0) keys[k.split('|')[1]] = 1; });
       });
-      salData.advances.forEach(function (a) {
-        if (a.staffId !== st.id) return;
-        const bs = adToBs(dateOfIso(a.iso)); if (bs) keys[salKey(bs.y, bs.m)] = 1;
+      salData.payments.forEach(function (x) { if (x.staffId === st.id) keys[x.ym] = 1; });
+      salData.advances.forEach(function (x) {
+        if (x.staffId !== st.id) return;
+        const bs = adToBs(dateOfIso(x.iso)); if (bs) keys[salKey(bs.y, bs.m)] = 1;
       });
       Object.keys(keys).sort().forEach(function (ym) {
         const y = parseInt(ym.slice(0, 4), 10), m = parseInt(ym.slice(5), 10) - 1;
         const c = salCompute(st, y, m);
-        let p = 0, h = 0, a = 0;
-        Object.keys(c.attMap).forEach(function (d) { const v = c.attMap[d]; if (v === 1) p++; else if (v === 0.5) h++; else a++; });
-        rows.push([ym, BS_MONTHS[m] + ' ' + y, st.name, salIsDaily(st) ? 'Daily' : 'Monthly', salRate(st, y, m), p, h, a, c.earned, c.advTotal, c.net, c.paid ? 'Paid ' + c.paid.iso : 'Not paid']);
+        let pr = 0, h = 0, ab = 0;
+        Object.keys(c.attMap).forEach(function (d) { const v = c.attMap[d]; if (v === 1) pr++; else if (v === 0.5) h++; else ab++; });
+        rows.push([ym, BS_MONTHS[m] + ' ' + y, st.name, salIsDaily(st) ? 'Daily' : 'Monthly', salRate(st, y, m), pr, h, ab, c.earned, c.advTotal, c.net, c.paidTotal, c.remaining,
+                   c.status === 'paid' ? 'Paid in full' : c.status === 'part' ? 'Part paid' : c.status === 'none' ? 'No balance' : 'Not paid']);
       });
     });
     return rows;
   }
-  function salPush() {
+  // One row per payment made = the payment history tab
+  function salBuildPayRows() {
+    const nm = function (id) { const st = salData.staff.find(function (x) { return x.id === id; }); return st ? st.name : ''; };
+    return salData.payments.slice().sort(function (x, y) { return x.iso < y.iso ? 1 : x.iso > y.iso ? -1 : 0; }).map(function (x) {
+      const y = parseInt(String(x.ym).slice(0, 4), 10), m = parseInt(String(x.ym).slice(5), 10) - 1;
+      return [x.iso, nm(x.staffId), (BS_MONTHS[m] || '') + ' ' + y, x.amount, x.note || '', x.by || ''];
+    });
+  }
+  function salRenderSafe() {
+    const ae = document.activeElement;
+    const typing = ae && ae.closest && ae.closest('#salList, #salAddStaffCard') && /INPUT|TEXTAREA/.test(ae.tagName);
+    const pg = document.getElementById('orderSalaryContainer');
+    if (pg && pg.style.display !== 'none' && !salOpenForm && !salOpenPay && !typing) salRender();
+    if (window.salRenderDashCard) window.salRenderDashCard();
+  }
+  function salSync() {
     if (salSyncBusy) { salSyncAgain = true; return Promise.resolve(); }
-    salSyncBusy = true; salSetStatus('busy', 'Syncing to Google Sheet...');
-    return fetch(GOOGLE_SHEETS_API_URL, { method: 'POST', body: JSON.stringify({
-      action: 'salarySave', updatedAt: salData.updatedAt, data: salData, rows: salBuildReport(), staffName: currentStaffName || '' }) })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        if (!res || !res.ok) throw new Error((res && res.error) || 'Salary script not set up');
-        salSetStatus('ok', 'Synced to Google Sheet');
-      })
-      .catch(function (e) { salSetStatus('err', 'Not synced yet - saved on this device (' + (e && e.message ? e.message : 'offline') + ')'); })
+    salSyncBusy = true; salSetStatus('busy', 'Syncing with Google Sheet...');
+    const post = function (body) { return fetch(GOOGLE_SHEETS_API_URL, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }); };
+    return post({ action: 'salaryLoad' }).then(function (res) {
+      if (!res || !res.ok) throw new Error((res && res.error) || 'Salary script not set up');
+      const remote = salNorm(res.data); remote.updatedAt = Number(res.updatedAt) || 0;
+      const before = salSig(salData);
+      const merged = res.data ? salMerge(salData, remote) : salNorm(salData);
+      const changed = salSig(merged) !== before;
+      const needPush = !res.data || salSig(merged) !== salSig(remote);
+      salData = merged;
+      if (needPush) salData.updatedAt = Date.now();
+      try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
+      if (changed) salRenderSafe();
+      if (!needPush || (!salData.staff.length && !salData.del.length)) return null;
+      return post({ action: 'salarySave', updatedAt: salData.updatedAt, data: salData, rows: salBuildReport(), payRows: salBuildPayRows(), staffName: currentStaffName || '' })
+        .then(function (r) { if (!r || !r.ok) throw new Error((r && r.error) || 'Save failed'); });
+    }).then(function () { salSetStatus('ok', 'Synced - every phone sees the same staff & payments'); })
+      .catch(function (e) { salSetStatus('err', 'Not synced yet - saved on this phone (' + (e && e.message ? e.message : 'offline') + ')'); })
       .finally(function () { salSyncBusy = false; if (salSyncAgain) { salSyncAgain = false; salQueuePush(); } });
   }
-  function salQueuePush() { clearTimeout(salSyncT); salSetStatus('busy', 'Saving...'); salSyncT = setTimeout(salPush, 1200); }
-  // Newest copy wins: pull on open; if this device is newer (or the Sheet is empty) push instead
-  function salPull() {
-    salSetStatus('busy', 'Checking Google Sheet...');
-    return fetch(GOOGLE_SHEETS_API_URL, { method: 'POST', body: JSON.stringify({ action: 'salaryLoad' }) })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        if (!res || !res.ok) throw new Error((res && res.error) || 'Salary script not set up');
-        const rt = Number(res.updatedAt) || 0, rd = res.data;
-        if (rd && rt > (salData.updatedAt || 0)) {
-          salData = { staff: rd.staff || [], advances: rd.advances || [], paid: rd.paid || {}, att: rd.att || {}, dr: rd.dr || {}, updatedAt: rt };
-          try { localStorage.setItem(SAL_KEY, JSON.stringify(salData)); } catch (e) {}
-          salRender(); salSetStatus('ok', 'Synced to Google Sheet');
-        } else if (salData.staff.length && ((salData.updatedAt || 0) > rt || rt === 0)) {
-          if (!salData.updatedAt) salData.updatedAt = Date.now();
-          return salPush();
-        } else { salSetStatus('ok', 'Synced to Google Sheet'); }
-      })
-      .catch(function (e) { salSetStatus('err', 'Offline - showing data saved on this device (' + (e && e.message ? e.message : 'no connection') + ')'); });
-  }
-  window.addEventListener('online', function () {
-    const pg = document.getElementById('orderSalaryContainer');
-    if (pg && pg.style.display !== 'none') salPull();
-  });
+  function salQueuePush() { clearTimeout(salSyncT); salSetStatus('busy', 'Saving...'); salSyncT = setTimeout(salSync, 1200); }
+  function salPull() { return salSync(); }
+  // Quiet refresh for the dashboard (at most once every 30s)
+  window.salBgSync = function () { if (Date.now() - salLastBg < 30000) return; salLastBg = Date.now(); salSync(); };
+  // While the salary page is open, keep checking for changes from other phones
+  function salPageOpen() { const pg = document.getElementById('orderSalaryContainer'); return !!pg && pg.style.display !== 'none'; }
+  setInterval(function () { if (!document.hidden && salPageOpen()) salSync(); }, 20000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && salPageOpen()) salSync(); });
+  window.addEventListener('online', function () { if (salPageOpen()) salSync(); });
   function salId() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function salNpr(n) { return 'NPR ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-IN'); }
   function salEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -2950,8 +3013,13 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const custom = customDays.reduce(function (t, d) { return t + (Number(drMap[d]) || 0); }, 0);
     const regDays = Object.keys(attMap).reduce(function (t, d) { return Object.prototype.hasOwnProperty.call(drMap, d) ? t : t + attMap[d]; }, 0);
     const earned = salIsDaily(st) ? rate * regDays + custom : rate;
-    return { advs: advs, advTotal: advTotal, attMap: attMap, days: days, regDays: regDays, drMap: drMap, customDays: customDays, custom: custom, earned: earned, net: earned - advTotal,
-             paid: salData.paid[st.id + '|' + salKey(y, m)] || null };
+    const pays = salData.payments.filter(function (x) { return x.staffId === st.id && x.ym === salKey(y, m); })
+      .sort(function (a, b) { return a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : 0; });
+    const paidTotal = pays.reduce(function (t, x) { return t + (Number(x.amount) || 0); }, 0);
+    const net = earned - advTotal, remaining = net - paidTotal;
+    const status = paidTotal > 0 ? (remaining <= 0 ? 'paid' : 'part') : (net <= 0 ? 'none' : 'due');
+    return { advs: advs, advTotal: advTotal, attMap: attMap, days: days, regDays: regDays, drMap: drMap, customDays: customDays, custom: custom, earned: earned, net: net,
+             pays: pays, paidTotal: paidTotal, remaining: remaining, status: status, paid: status === 'paid' ? pays[pays.length - 1] : null };
   }
 
   function salCurrentBs() { return adToBs(new Date()) || { y: BS_MIN_YEAR, m: 0, d: 1 }; }
@@ -2959,7 +3027,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   window.openSalarySheet = function () {
     salLoad();
     if (salViewYear === null) { const bs = salCurrentBs(); salViewYear = bs.y; salViewMonth = bs.m; }
-    salOpenForm = null; salOpenAtt = null;
+    salOpenForm = null; salOpenPay = null; salOpenAtt = null;
     salRender();
     switchTab('salary');
     window.scrollTo(0, 0);
@@ -2975,7 +3043,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     if (m > 11) { m = 0; y++; }
     if (m < 0) { m = 11; y--; }
     if (y < BS_MIN_YEAR || y > BS_MAX_YEAR) return;
-    salViewMonth = m; salViewYear = y; salOpenForm = null; salOpenAtt = null;
+    salViewMonth = m; salViewYear = y; salOpenForm = null; salOpenPay = null; salOpenAtt = null;
     salRender();
   };
 
@@ -3021,8 +3089,10 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     if (!st) return;
     appConfirm('Remove ' + st.name + ' and all their advance and attendance records?').then(function (ok) {
       if (!ok) return;
+      salData.del.push(id);
       salData.staff = salData.staff.filter(function (x) { return x.id !== id; });
       salData.advances = salData.advances.filter(function (a) { return a.staffId !== id; });
+      salData.payments = salData.payments.filter(function (a) { return a.staffId !== id; });
       [salData.paid, salData.att, salData.dr].forEach(function (o) {
         Object.keys(o).forEach(function (k) { if (k.indexOf(id + '|') === 0) delete o[k]; });
       });
@@ -3031,7 +3101,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   };
 
   window.salToggleAdvForm = function (id) {
-    salOpenForm = salOpenForm === id ? null : id;
+    salOpenForm = salOpenForm === id ? null : id; salOpenPay = null;
     salRender();
     if (salOpenForm) { const el = document.getElementById('salAdvAmt-' + id); if (el) el.focus(); }
   };
@@ -3103,8 +3173,15 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     }
     L.push('Total advance: ' + salNpr(c.advTotal));
     L.push('');
-    L.push('*' + (c.net < 0 ? 'Over-advanced: ' : 'Balance to pay: ') + salNpr(Math.abs(c.net)) + '*');
-    L.push(c.paid ? 'Status: Paid on ' + formatDateHuman(c.paid.iso) : 'Status: Not paid yet');
+    L.push((c.net < 0 ? 'Over-advanced: ' : 'Payable: ') + salNpr(Math.abs(c.net)));
+    if (c.pays.length) {
+      L.push('');
+      L.push('Payments made:');
+      c.pays.forEach(function (x) { L.push('- ' + formatDateHuman(x.iso) + ': ' + salNpr(x.amount) + (x.note ? ' (' + x.note + ')' : '')); });
+      L.push('Total paid: ' + salNpr(c.paidTotal));
+    }
+    L.push('');
+    L.push('*' + (c.remaining <= 0 && c.paidTotal ? 'Fully paid' : 'Still to pay: ' + salNpr(Math.max(c.remaining, 0))) + '*');
     window.open('https://wa.me/?text=' + encodeURIComponent(L.join('\n')), '_blank');
   };
 
@@ -3113,7 +3190,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const dim = bsDaysInMonth(salViewYear, salViewMonth);
     const map = {};
     for (let d = 1; d <= dim; d++) {
-      if (bsToAd(salViewYear, salViewMonth, d).getDay() !== 6) map[d] = 1;   // Saturday = weekly off
+      map[d] = 1;   // shop is open every day, Saturday included
     }
     salData.att[key] = map;
     salSave(); salRender();
@@ -3145,7 +3222,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const amount = Number(amtEl.value);
     const iso = dateEl.dataset.iso || isoOfDate(new Date());
     if (!(amount > 0)) { appAlert('Enter the advance amount.'); return; }
-    salData.advances.push({ id: salId(), staffId: id, iso: iso, amount: amount, note: noteEl.value.trim() });
+    salData.advances.push({ id: salId(), staffId: id, iso: iso, amount: amount, note: noteEl.value.trim(), by: currentStaffName || '' });
     const bs = adToBs(dateOfIso(iso));
     if (bs) { salViewYear = bs.y; salViewMonth = bs.m; }
     salOpenForm = null;
@@ -3155,20 +3232,36 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   window.salDeleteAdvance = function (advId) {
     appConfirm('Delete this advance entry?').then(function (ok) {
       if (!ok) return;
+      salData.del.push(advId);
       salData.advances = salData.advances.filter(function (a) { return a.id !== advId; });
       salSave(); salRender();
     });
   };
 
-  window.salTogglePaid = function (id) {
-    const st = salData.staff.find(function (x) { return x.id === id; });
-    if (!st) return;
-    const key = id + '|' + salKey(salViewYear, salViewMonth);
-    if (salData.paid[key]) { delete salData.paid[key]; salSave(); salRender(); return; }
-    const c = salCompute(st, salViewYear, salViewMonth);
-    appConfirm('Mark ' + st.name + '\'s ' + BS_MONTHS[salViewMonth] + ' salary as paid (' + salNpr(c.net) + ')?').then(function (ok) {
+  window.salTogglePayForm = function (id) {
+    salOpenPay = salOpenPay === id ? null : id; salOpenForm = null;
+    salRender();
+    if (salOpenPay) { const el = document.getElementById('salPayAmt-' + id); if (el) { el.focus(); el.select(); } }
+  };
+
+  // Record a payment (part or full). Every payment is kept in the payment history.
+  window.salAddPayment = function (id) {
+    const amtEl = document.getElementById('salPayAmt-' + id);
+    const dateEl = document.getElementById('salPayDate-' + id);
+    const noteEl = document.getElementById('salPayNote-' + id);
+    const amount = Number(amtEl.value);
+    const iso = dateEl.dataset.iso || isoOfDate(new Date());
+    if (!(amount > 0)) { appAlert('Enter the amount you are paying.'); return; }
+    salData.payments.push({ id: salId(), staffId: id, ym: salKey(salViewYear, salViewMonth), iso: iso, amount: amount, note: noteEl.value.trim(), by: currentStaffName || '' });
+    salOpenPay = null;
+    salSave(); salRender();
+  };
+
+  window.salDeletePayment = function (payId) {
+    appConfirm('Delete this payment entry? The amount will count as unpaid again.').then(function (ok) {
       if (!ok) return;
-      salData.paid[key] = { iso: isoOfDate(new Date()), amount: c.net };
+      salData.del.push(payId);
+      salData.payments = salData.payments.filter(function (x) { return x.id !== payId; });
       salSave(); salRender();
     });
   };
@@ -3183,33 +3276,38 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const dim = bsDaysInMonth(salViewYear, salViewMonth);
     const firstWd = bsToAd(salViewYear, salViewMonth, 1).getDay();
     let h = '<div class="sal-att-grid">';
-    ['आइत','सोम','मंगल','बुध','बिहि','शुक्र','शनि'].forEach(function (n, i) { h += '<span class="h' + (i === 6 ? ' sat' : '') + '">' + n + '</span>'; });
+    ['आइत','सोम','मंगल','बुध','बिहि','शुक्र','शनि'].forEach(function (n, i) { h += '<span class="h">' + n + '</span>'; });
     for (let i = 0; i < firstWd; i++) h += '<button type="button" class="sal-day empty" disabled></button>';
     for (let d = 1; d <= dim; d++) {
       const v = c.attMap[d] || 0;
-      const cls = 'sal-day' + (c.attMap[d] === undefined ? '' : v === 1 ? ' p' : v === 0.5 ? ' h' : ' a') + ((firstWd + d - 1) % 7 === 6 ? ' sat' : '') + (Object.prototype.hasOwnProperty.call(c.drMap, d) ? ' cu' : '');
+      const cls = 'sal-day' + (c.attMap[d] === undefined ? '' : v === 1 ? ' p' : v === 0.5 ? ' h' : ' a') + (Object.prototype.hasOwnProperty.call(c.drMap, d) ? ' cu' : '');
       h += '<button type="button" class="' + cls + '" data-sid="' + st.id + '" data-day="' + d + '"' + (Object.prototype.hasOwnProperty.call(c.drMap, d) ? ' title="Custom wage ' + salNpr(c.drMap[d]) + '"' : '') + ' onclick="salTapDay(\'' + st.id + '\',' + d + ')">' + d + '</button>';
     }
     h += '</div><div class="sal-att-legend"><span><i style="background:var(--brand-purple-deep)"></i>Full day</span><span><i style="background:rgba(217,154,22,.5)"></i>Half day</span><span><i style="background:rgba(225,29,63,.35)"></i>Absent</span><span><i style="background:var(--brand-purple-deep);outline:2px solid #fff;outline-offset:-4px"></i>Custom wage (hold a day)</span><span>Tap a day to change</span></div>' +
-      '<div class="sal-actions"><button type="button" class="history-card-btn-view" onclick="salAllPresent(\'' + st.id + '\')">All Present (except Sat)</button>' +
+      '<div class="sal-actions"><button type="button" class="history-card-btn-view" onclick="salAllPresent(\'' + st.id + '\')">All Present</button>' +
       '<button type="button" class="history-card-btn-delete" onclick="salClearAtt(\'' + st.id + '\')">Clear</button></div>';
     return h;
   }
 
   function salRender() {
     document.getElementById('salMonthTitle').innerHTML = salMonthTitleHtml(salViewYear, salViewMonth, true);
-    let totEarned = 0, totAdv = 0, paidN = 0, html = '';
+    let totEarned = 0, totAdv = 0, totRem = 0, paidN = 0, html = '';
     if (!salData.staff.length) {
       html = '<div class="sal-empty">No staff added yet. Add a staff member below to start tracking salary and advances.</div>';
     }
     salData.staff.forEach(function (st) {
       const c = salCompute(st, salViewYear, salViewMonth);
       const daily = salIsDaily(st);
-      totEarned += c.earned; totAdv += c.advTotal; if (c.paid) paidN++;
+      totEarned += c.earned; totAdv += c.advTotal; totRem += c.remaining; if (c.status === 'paid') paidN++;
       const advHtml = c.advs.length ? c.advs.map(function (a) {
         return '<div class="sal-adv-item"><span>' + salNpr(a.amount) + '<small>' + salEsc(formatDateHuman(a.iso)) + (a.note ? ' &middot; ' + salEsc(a.note) : '') + '</small></span>' +
           '<button type="button" class="sal-x" onclick="salDeleteAdvance(\'' + a.id + '\')" aria-label="Delete advance">&times;</button></div>';
       }).join('') : '<div class="sal-sub">No advance taken this month.</div>';
+      const payHtml = c.pays.length ? c.pays.map(function (x) {
+        return '<div class="sal-adv-item pay"><span>' + salNpr(x.amount) + '<small>' + salEsc(formatDateHuman(x.iso)) + (x.note ? ' &middot; ' + salEsc(x.note) : '') + (x.by ? ' &middot; ' + salEsc(x.by) : '') + '</small></span>' +
+          '<button type="button" class="sal-x" onclick="salDeletePayment(\'' + x.id + '\')" aria-label="Delete payment">&times;</button></div>';
+      }).join('') : '<div class="sal-sub">No payment made this month.</div>';
+      const payOpen = salOpenPay === st.id;
       const formOpen = salOpenForm === st.id, attOpen = salOpenAtt === st.id;
       const cur = salCurrentBs(), isNow = cur.y === salViewYear && cur.m === salViewMonth;
       const tv = isNow ? c.attMap[cur.d] : undefined;
@@ -3221,7 +3319,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       html += '<div class="sal-card">' +
         '<div class="sal-card-top"><div class="sal-who"><span class="sal-avatar">' + salEsc(st.name.charAt(0).toUpperCase()) + '</span><div><div class="sal-name">' + salEsc(st.name) + '<span class="sal-tag ' + (daily ? 'daily' : '') + '">' + (daily ? 'Daily' : 'Monthly') + '</span></div>' +
         '<div class="sal-sub">' + (daily ? salNpr(salRate(st, salViewYear, salViewMonth)) + ' per day' : salNpr(salRate(st, salViewYear, salViewMonth)) + ' per month') + '</div></div></div>' +
-        '<span class="sal-pill ' + (c.paid ? 'paid' : 'due') + '">' + (c.paid ? 'Paid ' + salEsc(formatDateHuman(c.paid.iso)) : 'Not paid') + '</span></div>' +
+        '<span class="sal-pill ' + (c.status === 'paid' ? 'paid' : c.status === 'part' ? 'part' : c.status === 'none' ? 'none' : 'due') + '">' + (c.status === 'paid' ? 'Paid in full' : c.status === 'part' ? 'Part paid' : c.status === 'none' ? 'No balance' : 'Not paid') + '</span></div>' +
         '<div class="sal-block"><div class="sal-block-head"><span>Attendance' + (isNow ? ' &middot; Today' : '') + '</span>' +
           '<button type="button" class="sal-link" onclick="salToggleAtt(\'' + st.id + '\')">' + (attOpen ? 'Hide calendar' : 'Month calendar') + '</button></div>' +
           (isNow ? '<div class="sal-seg">' + seg('Present', 1, 'p') + seg('Half day', 0.5, 'h') + seg('Absent', 0, 'a') + '</div>' : '') +
@@ -3233,17 +3331,26 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
           (daily ? '<div class="sal-row"><span>Days worked</span><b>' + c.regDays + ' &times; ' + salNpr(salRate(st, salViewYear, salViewMonth)) + '</b></div>' + (c.customDays.length ? '<div class="sal-row"><span>Custom-wage days (' + c.customDays.length + ')</span><b>' + salNpr(c.custom) + '</b></div>' : '') : '') +
           '<div class="sal-row"><span>' + (daily ? 'Earned' : 'Salary') + '</span><b>' + salNpr(c.earned) + '</b></div>' +
           '<div class="sal-row neg"><span>Advance taken</span><b>- ' + salNpr(c.advTotal) + '</b></div>' +
-          '<div class="sal-row net"><span>' + (c.net < 0 ? 'Over-advanced' : 'Balance to pay') + '</span><b' + (c.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.net) + '</b></div>' +
+          '<div class="sal-row"><span>' + (c.net < 0 ? 'Over-advanced' : 'Payable') + '</span><b>' + salNpr(c.net) + '</b></div>' +
+          (c.paidTotal ? '<div class="sal-row pos"><span>Paid so far</span><b>- ' + salNpr(c.paidTotal) + '</b></div>' : '') +
+          '<div class="sal-row net"><span>' + (c.remaining < 0 ? (c.paidTotal ? 'Paid extra' : 'Over-advanced') : (c.paidTotal && c.remaining === 0 ? 'Fully paid' : 'Still to pay')) + '</span><b style="color:' + (c.remaining < 0 ? 'var(--red-ink)' : (c.paidTotal && c.remaining === 0 ? 'var(--green-ink)' : 'inherit')) + '">' + salNpr(Math.abs(c.remaining)) + '</b></div>' +
         '</div><div class="sal-adv-list">' + advHtml + '</div></div>' +
+        '<div class="sal-block"><div class="sal-block-head"><span>Payment history</span></div><div class="sal-adv-list">' + payHtml + '</div></div>' +
         '<div class="sal-form' + (formOpen ? ' open' : '') + '">' +
           '<div class="input-group"><label for="salAdvAmt-' + st.id + '">Advance Amount (NPR)</label><input type="number" id="salAdvAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0"></div>' +
           '<div class="input-group"><label for="salAdvDate-' + st.id + '">Date (BS)</label><input type="text" id="salAdvDate-' + st.id + '" readonly placeholder="Select date" autocomplete="off" style="cursor:pointer;" onclick="openCalendarPopup(\'salAdvDate-' + st.id + '\')"></div>' +
           '<div class="input-group"><label for="salAdvNote-' + st.id + '">Note (optional)</label><input type="text" id="salAdvNote-' + st.id + '" placeholder="Reason"></div>' +
           '<button type="button" class="sal-btn primary" onclick="salAddAdvance(\'' + st.id + '\')">Save Advance</button>' +
         '</div>' +
+        '<div class="sal-form' + (payOpen ? ' open' : '') + '">' +
+          '<div class="input-group"><label for="salPayAmt-' + st.id + '">Amount Paid (NPR)</label><input type="number" id="salPayAmt-' + st.id + '" min="1" inputmode="numeric" placeholder="0" value="' + (c.remaining > 0 ? Math.round(c.remaining * 100) / 100 : '') + '"></div>' +
+          '<div class="input-group"><label for="salPayDate-' + st.id + '">Date (BS)</label><input type="text" id="salPayDate-' + st.id + '" readonly placeholder="Select date" autocomplete="off" style="cursor:pointer;" onclick="openCalendarPopup(\'salPayDate-' + st.id + '\')"></div>' +
+          '<div class="input-group"><label for="salPayNote-' + st.id + '">Note (optional)</label><input type="text" id="salPayNote-' + st.id + '" placeholder="e.g. Week 1 wages"></div>' +
+          '<button type="button" class="sal-btn primary" onclick="salAddPayment(\'' + st.id + '\')">Save Payment</button>' +
+        '</div>' +
         '<div class="sal-main-actions">' +
           '<button type="button" class="sal-btn" onclick="salToggleAdvForm(\'' + st.id + '\')">' + (formOpen ? 'Cancel' : 'Give Advance') + '</button>' +
-          '<button type="button" class="sal-btn primary" onclick="salTogglePaid(\'' + st.id + '\')">' + (c.paid ? 'Undo Paid' : 'Mark Paid') + '</button></div>' +
+          '<button type="button" class="sal-btn primary" onclick="salTogglePayForm(\'' + st.id + '\')">' + (payOpen ? 'Cancel' : 'Pay Wages') + '</button></div>' +
         '<div class="sal-more"><button type="button" class="sal-link" onclick="salShareSlip(\'' + st.id + '\')">Share slip</button><button type="button" class="sal-link" onclick="salEditSalary(\'' + st.id + '\')">' + (daily ? 'Edit wage' : 'Edit salary') + '</button>' +
           '<button type="button" class="sal-link danger" onclick="salRemoveStaff(\'' + st.id + '\')">Remove staff</button></div>' +
         '</div>';
@@ -3252,11 +3359,34 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     document.getElementById('salTotSalary').textContent = salNpr(totEarned);
     document.getElementById('salTotAdvance').textContent = salNpr(totAdv);
     document.getElementById('salPaidProg').textContent = paidN + ' / ' + salData.staff.length;
-    document.getElementById('salTotNet').textContent = salNpr(totEarned - totAdv);
+    document.getElementById('salTotNet').textContent = salNpr(totRem);
     if (salOpenForm) {
       const d = document.getElementById('salAdvDate-' + salOpenForm);
       if (d && !d.dataset.iso) setFieldISO(d.id, isoOfDate(new Date()));
     }
+    if (salOpenPay) {
+      const d = document.getElementById('salPayDate-' + salOpenPay);
+      if (d && !d.dataset.iso) setFieldISO(d.id, isoOfDate(new Date()));
+    }
+    salRenderPayHistory();
+  }
+
+  // All payments, newest first, every month
+  function salRenderPayHistory() {
+    const host = document.getElementById('salPayHistory');
+    if (!host) return;
+    const nm = function (id) { const st = salData.staff.find(function (x) { return x.id === id; }); return st ? st.name : 'Removed staff'; };
+    const list = salData.payments.slice().sort(function (x, y) { return x.iso < y.iso ? 1 : x.iso > y.iso ? -1 : 0; });
+    let total = 0; list.forEach(function (x) { total += Number(x.amount) || 0; });
+    let h = '<div class="sal-name" style="margin-bottom:4px;">Payment History</div><div class="sal-sub" style="margin-bottom:8px;">' + list.length + ' payment' + (list.length === 1 ? '' : 's') + ' &middot; ' + salNpr(total) + ' paid in total</div>';
+    if (!list.length) h += '<div class="sal-sub">No payments recorded yet. Use Pay Wages on a staff card.</div>';
+    list.slice(0, 40).forEach(function (x) {
+      const y = parseInt(String(x.ym).slice(0, 4), 10), m = parseInt(String(x.ym).slice(5), 10) - 1;
+      h += '<div class="sal-adv-item pay"><span>' + salEsc(nm(x.staffId)) + ' &middot; ' + salNpr(x.amount) + '<small>' + salEsc(formatDateHuman(x.iso)) + ' &middot; for ' + salEsc((BS_MONTHS[m] || '') + ' ' + y) + (x.note ? ' &middot; ' + salEsc(x.note) : '') + '</small></span>' +
+        '<button type="button" class="sal-x" onclick="salDeletePayment(\'' + x.id + '\')" aria-label="Delete payment">&times;</button></div>';
+    });
+    if (list.length > 40) h += '<div class="sal-sub" style="margin-top:6px;">Showing the latest 40. Export the CSV for all.</div>';
+    host.innerHTML = h;
   }
 
   // ---- Dashboard card: current BS month at a glance ----
@@ -3265,18 +3395,18 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     if (!host) return;
     salLoad();
     const bs = salCurrentBs();
-    let earned = 0, adv = 0, rows = '';
+    let earned = 0, adv = 0, rem = 0, rows = '';
     salData.staff.forEach(function (st) {
       const c = salCompute(st, bs.y, bs.m);
-      earned += c.earned; adv += c.advTotal;
+      earned += c.earned; adv += c.advTotal; rem += c.remaining;
       const sub = salIsDaily(st) ? c.days + ' day' + (c.days === 1 ? '' : 's') + ' worked' : 'Monthly';
       rows += '<div class="dashboard-mini-row clickable" onclick="openSalarySheet()"><span><span class="name">' + salEsc(st.name) + '</span><br><span class="sub">' + sub +
-        (c.advTotal ? ' &middot; advance ' + salNpr(c.advTotal) : '') + (c.paid ? ' &middot; paid' : '') + '</span></span>' +
-        '<span class="dashboard-mini-row-right"><span class="amt"' + (c.net < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.net) + '</span></span></div>';
+        (c.advTotal ? ' &middot; advance ' + salNpr(c.advTotal) : '') + (c.status === 'paid' ? ' &middot; paid' : c.status === 'part' ? ' &middot; part paid' : '') + '</span></span>' +
+        '<span class="dashboard-mini-row-right"><span class="amt"' + (c.remaining < 0 ? ' style="color:var(--accent-red)"' : '') + '>' + salNpr(c.remaining) + '</span></span></div>';
     });
     let html = '<div class="dashboard-section-card" style="--card-delay:0.05s"><div class="dashboard-section-title">Staff Salary &middot; ' + salMonthTitleHtml(bs.y, bs.m, false) + '</div>';
     if (salData.staff.length) {
-      html += '<div class="dash-sal-stats"><div><span>Earned</span><b>' + salNpr(earned) + '</b></div><div class="adv"><span>Advance</span><b>' + salNpr(adv) + '</b></div><div class="net"><span>To Pay</span><b>' + salNpr(earned - adv) + '</b></div></div>' + rows;
+      html += '<div class="dash-sal-stats"><div><span>Earned</span><b>' + salNpr(earned) + '</b></div><div class="adv"><span>Advance</span><b>' + salNpr(adv) + '</b></div><div class="net"><span>To Pay</span><b>' + salNpr(rem) + '</b></div></div>' + rows;
     } else {
       html += '<div class="dashboard-empty">No staff added yet.</div>';
     }
@@ -3304,9 +3434,8 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     salData.advances.slice().sort(function (a, b) { return a.iso < b.iso ? -1 : 1; }).forEach(function (a) {
       rows.push(['Advance', nameOf(a.staffId), '', formatDateHuman(a.iso), a.iso, a.amount, a.note || '']);
     });
-    Object.keys(salData.paid).forEach(function (k) {
-      const p = salData.paid[k], parts = k.split('|');
-      rows.push(['Salary Paid (' + parts[1] + ' BS)', nameOf(parts[0]), '', formatDateHuman(p.iso), p.iso, p.amount, '']);
+    salData.payments.slice().sort(function (a, b) { return a.iso < b.iso ? -1 : 1; }).forEach(function (p) {
+      rows.push(['Payment (' + p.ym + ' BS)', nameOf(p.staffId), '', formatDateHuman(p.iso), p.iso, p.amount, p.note || '']);
     });
     const csv = rows.map(function (r) { return r.map(cell).join(','); }).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -5682,6 +5811,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
   function renderDashboard() {
     const content = document.getElementById('dashboardContent');
     if (window.salRenderDashCard) window.salRenderDashCard();
+    if (window.salBgSync) window.salBgSync();
     const _cachedDash = getFallbackHistory();
     if (_cachedDash.length) buildDashboard(_cachedDash, false);
     else content.innerHTML = skeletonDashboard();
