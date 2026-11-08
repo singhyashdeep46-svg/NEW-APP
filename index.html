@@ -1959,6 +1959,85 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
 
 /* Dates: Nepali (BS) first, English (AD) small beneath */
 .order-view-grid strong small.ad-sub { display: block; margin-top: 2px; font-size: 12px; font-weight: 500; color: var(--label-2); letter-spacing: 0; }
+
+/* =====================================================================
+   DASHBOARD — redesign
+   Question it answers first: what do I need to collect and deliver?
+   Face: the tape-measure ruler + tape-yellow ground (same as the order
+   ticket). Figures are type, not tiles; surfaces are flat hairlines;
+   the only hue is on data (paid share, overdue count).
+   ===================================================================== */
+#orderDashboardContainer { --tape: #efe3b6; --tape-fg: #2b2410; --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
+html.dark-mode #orderDashboardContainer { --tape: #463d22; --tape-fg: #f1e3ad; }
+
+#orderDashboardContainer > .section-title-container { margin: 0 2px 4px; }
+#orderDashboardContainer > .section-title-container .section-title-dot { display: none; }
+#orderDashboardContainer > .section-title-container h2 { font-family: var(--font-display); font-size: 30px; font-weight: 600; letter-spacing: -.03em; text-transform: none; }
+.dsh-date { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 2px 14px; font-variant-numeric: tabular-nums; }
+.dsh-date b { font-size: 15px; font-weight: 600; color: var(--label); }
+.dsh-date span { font-size: 13px; color: var(--label-2); }
+
+/* hero: the money still outside */
+.dsh-hero { position: relative; display: block; padding: 20px 18px 24px; margin-bottom: 10px; border-radius: 22px; overflow: hidden;
+  background: var(--tape); color: var(--tape-fg); box-shadow: inset 0 0 0 .5px rgba(0,0,0,.1); cursor: pointer;
+  transition: transform .16s var(--ease-out); -webkit-tap-highlight-color: transparent; }
+.dsh-hero:active { transform: scale(.985); }
+.dsh-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; opacity: .4; pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 36px) left bottom / 100% 12px no-repeat,
+    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 6px) left bottom / 100% 6px no-repeat; }
+.dsh-eyebrow { display: block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .72; }
+.dsh-fig { display: block; margin-top: 6px; font-family: var(--font-display); font-size: 46px; font-weight: 600; line-height: 1.05; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.dsh-bar { display: block; height: 6px; margin: 16px 0 8px; border-radius: 3px; background: rgba(0,0,0,.12); overflow: hidden; }
+html.dark-mode .dsh-bar { background: rgba(255,255,255,.14); }
+.dsh-bar i { display: block; height: 100%; border-radius: 3px; background: var(--accent); transform-origin: left; animation: dshgrow .7s var(--ease-out) both; }
+@keyframes dshgrow { from { transform: scaleX(0); } }
+.dsh-barlabel { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; opacity: .85; }
+
+/* attention strip: four counts, hairline separated, no tiles */
+.dsh-attn { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 10px; border-radius: 20px; background: var(--surface); box-shadow: 0 0 0 .5px var(--sep-strong); overflow: hidden; }
+.dsh-attn button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 14px 12px 13px; background: none; border: 0; border-left: .5px solid var(--sep); text-align: left; color: var(--label);
+  transition: background .15s ease-out, transform .16s var(--ease-out); -webkit-tap-highlight-color: transparent; }
+.dsh-attn button:first-child { border-left: 0; }
+.dsh-attn button:active { background: var(--fill-2); transform: scale(.97); }
+.dsh-attn b { font-family: var(--font-display); font-size: 28px; font-weight: 600; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.dsh-attn b.bad { color: var(--red-ink); }
+.dsh-attn span { font-size: 11.5px; font-weight: 500; color: var(--label-2); line-height: 1.2; }
+
+/* ledger: orders + revenue as plain type */
+.dsh-ledger { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14px; border-radius: 20px; background: var(--surface); box-shadow: 0 0 0 .5px var(--sep-strong); overflow: hidden; }
+.dsh-ledger > div { display: flex; flex-direction: column; gap: 3px; padding: 14px 16px 15px; }
+.dsh-ledger > div + div { border-left: .5px solid var(--sep); }
+.dsh-ledger span { font-size: 12.5px; font-weight: 600; color: var(--label-2); }
+.dsh-ledger b { font-family: var(--font-display); font-size: 25px; font-weight: 600; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.dsh-ledger small { font-size: 12px; color: var(--label-2); line-height: 1.3; }
+
+/* every section card below: flat, hairline, quiet title */
+#orderDashboardContainer .dashboard-section-card {
+  padding: 16px 16px 8px; margin-bottom: 12px; border-radius: 22px;
+  background: var(--surface) !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 0 0 .5px var(--sep-strong) !important; }
+#orderDashboardContainer .dashboard-section-title { font-family: var(--font-display); font-size: 19px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 6px; }
+#orderDashboardContainer .dashboard-mini-row { border-top: .5px solid var(--sep); padding-top: 12px; padding-bottom: 12px; }
+#orderDashboardContainer .dashboard-mini-row .name { font-size: 15.5px; font-weight: 600; }
+#orderDashboardContainer .dashboard-mini-row .sub { font-size: 12.5px; }
+#orderDashboardContainer .dashboard-mini-row .amt { font-variant-numeric: tabular-nums; }
+#orderDashboardContainer .dashboard-mini-row.clickable { transition: background .15s ease-out; border-radius: 0; }
+#orderDashboardContainer .dashboard-view-all-btn { margin: 4px 0 8px; }
+
+@media (max-width: 380px) {
+  .dsh-fig { font-size: 40px; }
+  .dsh-attn b { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dsh-bar i { animation: none; }
+  .dsh-hero, .dsh-attn button { transition: none; }
+}
+
+/* bottom bar: 2 tabs | centre button | 2 tabs — the centre button is truly centred */
+.tab-switcher { padding-left: 6px; padding-right: 6px; }
+.tab-switcher .tab-btn:not(.tab-btn-fab) { flex: 1 1 0; }
+.tab-switcher .tab-btn-fab { flex: 0 0 56px; margin-left: 4px; margin-right: 4px; }
 </style>
 
 </head>
@@ -2010,6 +2089,10 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="tab-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 3a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2zm0 12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-2a2 2 0 0 1 2 -2zm10 -4a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2zm0 -8a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-2a2 2 0 0 1 2 -2z" /></svg>
       </span>
       <span class="tab-label">Dashboard</span>
+    </button>
+    <button type="button" class="tab-btn" id="tabStaff" onclick="openSalarySheet()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="tab-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><circle cx="9" cy="7.5" r="3.6"/><path d="M2.5 19.2A5.2 5.2 0 0 1 7.7 14h2.6a5.2 5.2 0 0 1 5.2 5.2v.6a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1z"/><circle cx="17.4" cy="8.4" r="2.6"/><path d="M17 13.4c2.9.2 5.1 2.2 5.1 4.8v.9a.9.9 0 0 1-.9.9h-3.3v-1.2a6.6 6.6 0 0 0-1.7-4.4z"/></svg>
+      <span class="tab-label">Staff</span>
     </button>
     <button type="button" class="tab-btn" id="tabSettings" onclick="switchTab('settings')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="tab-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14.647 4.081a.724 .724 0 0 0 1.08 .448c2.439 -1.485 5.23 1.305 3.745 3.744a.724 .724 0 0 0 .447 1.08c2.775 .673 2.775 4.62 0 5.294a.724 .724 0 0 0 -.448 1.08c1.485 2.439 -1.305 5.23 -3.744 3.745a.724 .724 0 0 0 -1.08 .447c-.673 2.775 -4.62 2.775 -5.294 0a.724 .724 0 0 0 -1.08 -.448c-2.439 1.485 -5.23 -1.305 -3.745 -3.744a.724 .724 0 0 0 -.447 -1.08c-2.775 -.673 -2.775 -4.62 0 -5.294a.724 .724 0 0 0 .448 -1.08c-1.485 -2.439 1.305 -5.23 3.744 -3.745a.722 .722 0 0 0 1.08 -.447c.673 -2.775 4.62 -2.775 5.294 0zm-2.647 4.919a3 3 0 1 0 0 6a3 3 0 0 0 0 -6" /></svg>
@@ -2175,8 +2258,9 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       <span class="section-title-dot billing"></span>
       <h2>Dashboard</h2>
     </div>
-    <div id="dashSalaryCard"></div>
+    <div id="dashboardTop"></div>
     <div id="deliveryCalendar"></div>
+    <div id="dashSalaryCard"></div>
     <div id="dashboardContent">
       <div class="dashboard-empty">Loading dashboard&hellip;</div>
     </div>
@@ -3727,6 +3811,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const tabHistoryBtn = document.getElementById('tabHistory');
     const tabDashboardBtn = document.getElementById('tabDashboard');
     const tabSettingsBtn = document.getElementById('tabSettings');
+    const tabStaffBtn = document.getElementById('tabStaff');
     const summaryBar = document.querySelector('.summary-bar');
 
     formContainer.style.display = 'none';
@@ -3738,6 +3823,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     tabHistoryBtn.classList.remove('active');
     tabDashboardBtn.classList.remove('active');
     tabSettingsBtn.classList.remove('active');
+    if (tabStaffBtn) tabStaffBtn.classList.remove('active');
     summaryBar.style.display = 'none';
 
     // Restart the fade/rise-in animation on whichever panel becomes visible,
@@ -3763,7 +3849,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       renderDashboard();
     } else if (tabId === 'salary') {
       revealPanel(salaryContainer);
-      tabDashboardBtn.classList.add('active');
+      if (tabStaffBtn) tabStaffBtn.classList.add('active');
     } else if (tabId === 'settings') {
       revealPanel(settingsContainer);
       tabSettingsBtn.classList.add('active');
@@ -5981,6 +6067,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     window.renderDeliveryCalendar(orders);
 
     if (!orders.length) {
+      document.getElementById('dashboardTop').innerHTML = '';
       content.innerHTML = '<div class="dashboard-empty">No orders yet — submit your first order to see stats here.</div>';
       return;
     }
@@ -6050,6 +6137,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       .slice(0, 6);
 
     let html = '';
+    let topHtml = '';
 
     if (offline) {
       const dashLastSync = formatSyncTime(getLastSyncTime());
@@ -6069,23 +6157,42 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const iconWarning = '<svg viewBox="0 0 24 24" fill="currentColor"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M19 2h-14a3 3 0 0 0 -3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3 -3v-14a3 3 0 0 0 -3 -3zm-9.387 6.21l.094 .083l2.293 2.292l2.293 -2.292a1 1 0 0 1 1.497 1.32l-.083 .094l-2.292 2.293l2.292 2.293a1 1 0 0 1 -1.32 1.497l-.094 -.083l-2.293 -2.292l-2.293 2.292a1 1 0 0 1 -1.497 -1.32l.083 -.094l2.292 -2.293l-2.292 -2.293a1 1 0 0 1 1.32 -1.497z" /></svg>';
     const chatIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5.821 4.91c3.899 -2.765 9.468 -2.539 13.073 .535c3.667 3.129 4.168 8.238 1.152 11.898c-2.841 3.447 -7.965 4.583 -12.231 2.805l-.233 -.101l-4.374 .931l-.04 .006l-.035 .007h-.018l-.022 .005h-.038l-.033 .004l-.021 -.001l-.023 .001l-.033 -.003h-.035l-.022 -.004l-.022 -.002l-.035 -.007l-.034 -.005l-.016 -.004l-.024 -.005l-.049 -.016l-.024 -.005l-.011 -.005l-.022 -.007l-.045 -.02l-.03 -.012l-.011 -.006l-.014 -.006l-.031 -.018l-.045 -.024l-.016 -.011l-.037 -.026l-.04 -.027l-.002 -.004l-.013 -.009l-.043 -.04l-.025 -.02l-.006 -.007l-.056 -.062l-.013 -.014l-.011 -.014l-.039 -.056l-.014 -.019l-.005 -.01l-.042 -.073l-.007 -.012l-.004 -.008l-.007 -.012l-.014 -.038l-.02 -.042l-.004 -.016l-.004 -.01l-.017 -.061l-.007 -.018l-.002 -.015l-.005 -.019l-.005 -.033l-.008 -.042l-.002 -.031l-.003 -.01v-.016l-.004 -.054l.001 -.036l.001 -.023l.002 -.053l.004 -.025v-.019l.008 -.035l.005 -.034l.005 -.02l.004 -.02l.018 -.06l.003 -.013l1.15 -3.45l-.022 -.037c-2.21 -3.747 -1.209 -8.391 2.413 -11.119z" /></svg>';
 
-    html += '<div class="dashboard-grid">';
-    html += '<div class="dashboard-stat-card orders" style="--card-delay:0.03s"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Total Orders</div><div class="dashboard-stat-icon">' + iconClipboard + '</div></div><div class="dashboard-stat-value">' + totalOrders + '</div><div class="dashboard-stat-sub">' + ordersThisWeek + ' in last 7 days &middot; ' + ordersThisMonth + ' this month</div></div>';
-    html += '<div class="dashboard-stat-card revenue" style="--card-delay:0.08s"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Total Revenue</div><div class="dashboard-stat-icon">' + iconBanknote + '</div></div><div class="dashboard-stat-value">NPR ' + totalRevenue.toLocaleString('en-IN') + '</div><div class="dashboard-stat-sub">NPR ' + revenueThisMonth.toLocaleString('en-IN') + ' this month &middot; avg NPR ' + avgOrderValue.toLocaleString('en-IN') + '/order</div></div>';
-    html += '<div class="dashboard-stat-card pending clickable" style="--card-delay:0.13s" onclick="showUnpaidOrders()"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Pending Balance</div><div class="dashboard-stat-icon">' + iconAlert + '</div></div><div class="dashboard-stat-value">NPR ' + totalPending.toLocaleString('en-IN') + '</div><div class="dashboard-stat-sub">' + (totalOrders - fullyPaidCount) + ' orders not fully paid &middot; tap to view</div></div>';
-    html += '<div class="dashboard-stat-card delivery" style="--card-delay:0.18s"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Pending Delivery</div><div class="dashboard-stat-icon">' + iconTruck + '</div></div><div class="dashboard-stat-value">' + pendingDeliveries + '</div><div class="dashboard-stat-sub">' + deliveredCount + ' delivered so far</div></div>';
-    html += '</div>';
-
-    // Order-status snapshot: Delivered / Pending / Not Paid — quick counts
-    // at a glance, separate from the money-focused cards above.
+    // ---- Top of the dashboard: what needs attention, then the money ----
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    let overdueCount = 0, dueSoonCount = 0;
+    withDates.forEach(function (row) {
+      if (row.o.delivered) return;
+      const dd = parseDMY(cleanDeliveryDate(row.o.deliveryDate), '-');
+      if (!dd) return;
+      if (dd < todayStart) overdueCount++;
+      else if (dd - todayStart <= 3 * 86400000) dueSoonCount++;
+    });
     const notPaidCount = totalOrders - fullyPaidCount;
-    html += '<div class="dashboard-grid dashboard-status-grid">';
-    html += '<div class="dashboard-stat-card status-delivered clickable" style="--card-delay:0.03s" onclick="showDeliveredOrders()"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Delivered</div><div class="dashboard-stat-icon">' + iconCheck + '</div></div><div class="dashboard-stat-value">' + deliveredCount + '</div><div class="dashboard-stat-sub">of ' + totalOrders + ' total orders &middot; tap to view</div></div>';
-    html += '<div class="dashboard-stat-card status-pending clickable" style="--card-delay:0.08s" onclick="showPendingOrders()"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Pending</div><div class="dashboard-stat-icon">' + iconClock + '</div></div><div class="dashboard-stat-value">' + pendingDeliveries + '</div><div class="dashboard-stat-sub">awaiting delivery &middot; tap to view</div></div>';
-    html += '<div class="dashboard-stat-card status-notpaid clickable" style="--card-delay:0.13s" onclick="showUnpaidOrders()"><div class="dashboard-stat-top"><div class="dashboard-stat-label">Not Paid</div><div class="dashboard-stat-icon">' + iconWarning + '</div></div><div class="dashboard-stat-value">' + notPaidCount + '</div><div class="dashboard-stat-sub">balance still due &middot; tap to view</div></div>';
-    html += '</div>';
+    const collected = Math.max(totalRevenue - totalPending, 0);
+    const paidPct = totalRevenue ? Math.round(collected / totalRevenue * 100) : 0;
+    const nowD = new Date();
+    const todayIso = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0') + '-' + String(nowD.getDate()).padStart(2, '0');
+    const todayBs = window.formatDateBs ? window.formatDateBs(todayIso) : '';
+    const todayAd = nowD.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+    const nf = function (n) { return Number(n).toLocaleString('en-IN'); };
 
-
+    topHtml += '<div class="dsh-date"><b>' + todayBs + '</b><span>' + todayAd + '</span></div>';
+    topHtml += '<section class="dsh-hero clickable" onclick="showUnpaidOrders()" aria-label="Unpaid balance, tap to view">' +
+      '<span class="dsh-eyebrow">Still to collect from customers</span>' +
+      '<span class="dsh-fig">NPR ' + nf(totalPending) + '</span>' +
+      '<span class="dsh-bar" aria-hidden="true"><i style="width:' + paidPct + '%"></i></span>' +
+      '<span class="dsh-barlabel"><span>NPR ' + nf(collected) + ' collected</span><span>' + notPaidCount + ' of ' + totalOrders + ' orders unpaid</span></span>' +
+      '</section>';
+    topHtml += '<div class="dsh-attn">' +
+      '<button type="button" onclick="showPendingOrders()"><b class="' + (overdueCount ? 'bad' : '') + '">' + overdueCount + '</b><span>Overdue</span></button>' +
+      '<button type="button" onclick="showPendingOrders()"><b>' + dueSoonCount + '</b><span>Due in 3 days</span></button>' +
+      '<button type="button" onclick="showPendingOrders()"><b>' + pendingDeliveries + '</b><span>To deliver</span></button>' +
+      '<button type="button" onclick="showDeliveredOrders()"><b>' + deliveredCount + '</b><span>Delivered</span></button>' +
+      '</div>';
+    topHtml += '<div class="dsh-ledger">' +
+      '<div><span>Orders</span><b>' + totalOrders + '</b><small>' + ordersThisWeek + ' in 7 days &middot; ' + ordersThisMonth + ' this month</small></div>' +
+      '<div><span>Revenue</span><b>NPR ' + nf(totalRevenue) + '</b><small>NPR ' + nf(revenueThisMonth) + ' this month &middot; avg ' + nf(avgOrderValue) + '</small></div>' +
+      '</div>';
 
     // Keep the underlying order objects around, indexed the same way as the
     // rows below, so a tap on a row (or its reminder icon) can look the
@@ -6145,6 +6252,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     html += '<button type="button" class="dashboard-view-all-btn" onclick="switchTab(\'history\')">View All Orders</button>';
     html += '</div>';
 
+    document.getElementById('dashboardTop').innerHTML = topHtml;
     content.innerHTML = html;
   }
 
