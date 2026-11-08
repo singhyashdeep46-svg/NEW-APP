@@ -1956,6 +1956,9 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
 .sal-allrow b { font-size: 17px; font-weight: 700; }
 .sal-yearhead { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0 2px; padding-top: 8px; font-size: 13px; font-weight: 700; color: var(--label-2); text-transform: uppercase; letter-spacing: .05em; border-top: .5px solid var(--sep); }
 .sal-yearhead b { color: var(--orange-ink); letter-spacing: 0; }
+
+/* Dates: Nepali (BS) first, English (AD) small beneath */
+.order-view-grid strong small.ad-sub { display: block; margin-top: 2px; font-size: 12px; font-weight: 500; color: var(--label-2); letter-spacing: 0; }
 </style>
 
 </head>
@@ -2746,6 +2749,28 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     return bs ? bs.d + ' ' + BS_MONTHS[bs.m] + ' ' + bs.y + ' (' + ad + ')' : ad;
   }
   window.formatDateBs = formatDateHuman;
+
+  // Any stored date ("10-10-2026", "07/11/2026" or "2026-11-07") -> Nepali (BS) + English (AD).
+  // Dates are STORED in English format for the sheet, but always SHOWN as BS first with AD beside it.
+  function dateBoth(str) {
+    const raw = String(str == null ? '' : str).trim();
+    if (!raw || raw === '-' || raw === '--') return null;
+    const q = raw.split(/[\/-]/);
+    if (q.length !== 3) return null;
+    const dt = q[0].length === 4 ? new Date(+q[0], +q[1] - 1, +q[2]) : new Date(+q[2], +q[1] - 1, +q[0]);
+    if (isNaN(dt.getTime())) return null;
+    const ad = String(dt.getDate()).padStart(2, '0') + ' ' + AD_MONTH_SHORT[dt.getMonth()] + ' ' + dt.getFullYear();
+    const bs = adToBs(dt);
+    return { bs: bs ? String(bs.d).padStart(2, '0') + ' ' + BS_MONTHS[bs.m] + ' ' + bs.y : '', ad: ad };
+  }
+  function dateBothText(str) { const b = dateBoth(str); return b ? (b.bs ? b.bs + ' (' + b.ad + ')' : b.ad) : (str || '--'); }
+  function dateBothHtml(str) {
+    const h = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    const b = dateBoth(str);
+    if (!b) return h(str || '--');
+    return b.bs ? h(b.bs) + '<small class="ad-sub">' + h(b.ad) + '</small>' : h(b.ad);
+  }
+  window.dateBothText = dateBothText; window.dateBothHtml = dateBothHtml;
 
   function getFieldISO(id) {
     const el = document.getElementById(id);
@@ -5159,7 +5184,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
     const staffLine = (order.lastEditedBy && order.lastEditedBy !== order.createdBy)
       ? `Created by ${esc(order.createdBy || '-')} &nbsp;•&nbsp; Last edited by ${esc(order.lastEditedBy)}`
       : (order.createdBy ? `Created by ${esc(order.createdBy)}` : '');
-    return `<div class="order-view"><div class="order-view-title"><div><h3>ORDER VIEW</h3><span>Complete order details & measurements</span></div><b>${esc(order.ticketId)}</b></div><div class="order-view-grid"><div><span>Customer</span><strong>${esc(order.customerName)}</strong></div><div><span>Phone</span><strong>${esc(order.phoneNumber)}</strong></div><div><span>Order Date</span><strong>${esc(order.dateSubmitted)}</strong></div><div><span>Delivery Date</span><strong>${esc(order.deliveryDate)}</strong></div></div>${staffLine ? `<div style="font-size:11.5px;color:var(--label-2);margin:-8px 0 14px;">${staffLine}</div>` : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;">${isDelivered ? '<span class="sheet-status synced">Delivered</span>' : ''}${isFullyPaid ? '<span class="sheet-status synced">Fully Paid</span>' : ''}</div><div class="order-view-items">${itemsHtml}</div><div class="order-view-money"><div><span>Total Amount</span><b>NPR ${total.toLocaleString('en-IN')}</b></div><div><span>Advance Paid</span><b>NPR ${advance.toLocaleString('en-IN')}</b></div><div class="balance"><span>Balance Remaining</span><b>NPR ${balance.toLocaleString('en-IN')}</b></div></div></div>`;
+    return `<div class="order-view"><div class="order-view-title"><div><h3>ORDER VIEW</h3><span>Complete order details & measurements</span></div><b>${esc(order.ticketId)}</b></div><div class="order-view-grid"><div><span>Customer</span><strong>${esc(order.customerName)}</strong></div><div><span>Phone</span><strong>${esc(order.phoneNumber)}</strong></div><div><span>Order Date</span><strong>${dateBothHtml(order.dateSubmitted)}</strong></div><div><span>Delivery Date</span><strong>${dateBothHtml(order.deliveryDate)}</strong></div></div>${staffLine ? `<div style="font-size:11.5px;color:var(--label-2);margin:-8px 0 14px;">${staffLine}</div>` : ''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;">${isDelivered ? '<span class="sheet-status synced">Delivered</span>' : ''}${isFullyPaid ? '<span class="sheet-status synced">Fully Paid</span>' : ''}</div><div class="order-view-items">${itemsHtml}</div><div class="order-view-money"><div><span>Total Amount</span><b>NPR ${total.toLocaleString('en-IN')}</b></div><div><span>Advance Paid</span><b>NPR ${advance.toLocaleString('en-IN')}</b></div><div class="balance"><span>Balance Remaining</span><b>NPR ${balance.toLocaleString('en-IN')}</b></div></div></div>`;
   }
 
   // Live Ticket Receipt Preview
@@ -6082,7 +6107,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         else if (diff === 0) { badgeClass = 'badge-today'; badgeText = 'Due today'; }
         else if (diff === 1) { badgeText = 'Due tomorrow'; }
         const reminderBtn = '<button type="button" class="dashboard-remind-btn" title="Send WhatsApp reminder" onclick="sendDeliveryReminder(\'upcoming\',' + idx + ',event)">' + whatsappSvg + '</button>';
-        return '<div class="dashboard-mini-row clickable" onclick="viewDashboardOrder(\'upcoming\',' + idx + ')"><span><span class="name">' + escapeHtml(o.customerName) + '</span><br><span class="sub">' + escapeHtml(o.deliveryDate) + ' &middot; ' + escapeHtml(o.ticketId) + '</span></span><span class="dashboard-mini-row-right"><span class="delivery-badge ' + badgeClass + '">' + badgeText + '</span>' + reminderBtn + chevronSvg + '</span></div>';
+        return '<div class="dashboard-mini-row clickable" onclick="viewDashboardOrder(\'upcoming\',' + idx + ')"><span><span class="name">' + escapeHtml(o.customerName) + '</span><br><span class="sub">' + escapeHtml(dateBothText(o.deliveryDate)) + ' &middot; ' + escapeHtml(o.ticketId) + '</span></span><span class="dashboard-mini-row-right"><span class="delivery-badge ' + badgeClass + '">' + badgeText + '</span>' + reminderBtn + chevronSvg + '</span></div>';
       }).join('');
     } else {
       html += '<div class="dashboard-empty">Nothing pending — all caught up.</div>';
@@ -6202,7 +6227,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
       html += withBalance.map(function (row, idx) {
         const o = row.o;
         return '<div class="dashboard-mini-row clickable" onclick="viewUnpaidOrder(' + idx + ')">' +
-          '<span><span class="name">' + escapeHtml(o.customerName) + '</span><br><span class="sub">' + escapeHtml(o.ticketId || '') + (o.deliveryDate ? ' &middot; due ' + escapeHtml(o.deliveryDate) : '') + '</span></span>' +
+          '<span><span class="name">' + escapeHtml(o.customerName) + '</span><br><span class="sub">' + escapeHtml(o.ticketId || '') + (o.deliveryDate ? ' &middot; due ' + escapeHtml(dateBothText(o.deliveryDate)) : '') + '</span></span>' +
           '<span class="dashboard-mini-row-right"><span class="amt">NPR ' + row.balance.toLocaleString('en-IN') + '</span></span>' +
           '</div>';
       }).join('');
@@ -6574,7 +6599,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
             </div>
             <div class="history-card-meta">
               <span class="history-card-ticket">${order.ticketId}</span>
-              <span class="history-card-date">${order.dateSubmitted}</span>
+              <span class="history-card-date">${dateBothText(order.dateSubmitted)}</span>
             </div>
           </div>
           
@@ -6823,7 +6848,7 @@ html.dark-mode #orderForm .bal-bar { background: rgba(255,255,255,.14); }
         document.getElementById('successCustName').textContent = customerName;
         document.getElementById('successTotal').textContent = 'NPR ' + total.toLocaleString('en-IN');
         document.getElementById('successBalance').textContent = 'NPR ' + (total - Number(advance)).toLocaleString('en-IN');
-        document.getElementById('successDelivery').textContent = deliveryDate;
+        document.getElementById('successDelivery').textContent = dateBothText(deliveryDate);
         document.getElementById('successQrSection').style.display = (total - Number(advance)) > 0 ? 'block' : 'none';
         document.getElementById('successOverlay').classList.add('show');
 
